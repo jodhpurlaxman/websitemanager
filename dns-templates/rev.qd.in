@@ -1,0 +1,14 @@
+$TTL  60;
+@       IN      SOA     ns1.qd.in. postmaster.qd.in. (
+                                2       ;<serial-number>
+                              60       ;<time-to-refresh>
+                              60       ;<time-to-retry>
+                           604800       ;<time-to-expire>
+                              60)      ;<minimum-TTL>
+; name servers
+      IN      NS      ns1.qd.in.
+      IN      NS      ns1.qd.in.
+
+; PTR Records
+101   IN      PTR     ns1.            ; 127.0.0.1
+101   IN      PTR     ns2.             ; 127.0.0.1

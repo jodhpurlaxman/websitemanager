@@ -1,0 +1,172 @@
+#!/bin/bash
+
+# ---------------------------------------------------------------------------- #
+# GLOBAL VARIABLES (in script)                                                 #
+# ---------------------------------------------------------------------------- #
+
+# red output
+RED='\033[0;31m'
+# green output
+GREEN='\033[0;32m'
+# Yellow outpu
+YELLOW='\033[0;33m'
+# No Color
+NC='\033[0m'
+CONFDIR="/opt/websitemanager"
+
+# ---------------------------------------------------------------------------- #
+# FUNCTIONS                                                                    #
+# ---------------------------------------------------------------------------- #
+
+#
+# Echoes a red message
+#
+echo-red() {
+    echo -e "${RED}$1${NC}"
+}
+
+#
+# Echoes a green message
+#
+echo-green() {
+    echo -e "${GREEN}$1${NC}"
+}
+
+#
+# Echoes a yellow message
+#
+echo-yellow() {
+    echo -e "${YELLOW}$1${NC}"
+}
+
+
+
+
+#
+# Verifies sudo 
+#
+systemmanager-verify-sudo() {
+
+    if [ "$EUID" -ne 0 ]
+      then echo-red "Please execute as root eg: sudo"
+      echo-red "else contact server administrator"	    
+      exit 1
+    fi
+
+}
+systemmanager-getusername() {
+username=$(logname)
+}
+systemmanager-install() {
+    systemmanager-verify-sudo;
+
+    if [ ! -e  "$CONFDIR" ]; then
+        mkdir "$CONFDIR"
+    fi
+
+    #cp template.conf template-phpfpm.conf template-pool.conf $CONFDIR
+    cp -r $(pwd)/. $CONFDIR
+    ln -s -f $CONFDIR/websitemanager /usr/bin/websitemanager
+    ln -s -f $CONFDIR/systemmanager /usr/bin/systemmanager
+    if grep "%developers" /etc/sudoers;then echo-green "developers group already exists in sudoers" fi;
+    else
+    echo "%developers ALL = NOPASSWD: /bin/systemctl restart apache2.service, /opt/websitemanager/websitemanager, /opt/websitemanager/systemmanager, /bin/kill" >> /etc/sudoers
+    fi
+    echo-green "Script installed! use: systemmanager and websitemanager"
+
+    exit 0
+}
+#
+# Shows info on the authors and the program
+#
+systemmanager-credits() {
+
+    echo -e "${GREEN}"
+    cat <<splash
+##############################################################################
+##############################################################################
+##systemmanager v1.0.0 Created by LKY Rajpurohit <qualdev.laxman@gmail.com>###
+##############################################################################
+##############################################################################
+splash
+    echo -e "${NC}"
+
+}
+systemmanager-credits;
+
+apt update
+commonpkg="git unzip bind9 filezilla cifs-utils resolvconf openssh-server composer nodejs git build-essential libtool autoconf software-properties-common curl wget gcc g++ make dirmngr apt-transport-https"
+
+apt install -y $commonpkg
+add-apt-repository ppa:ondrej/apache2 -y
+add-apt-repository ppa:ondrej/php -y
+curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+#adding mariadb repo
+sudo apt-get install -y software-properties-common dirmngr apt-transport-https
+sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
+sudo add-apt-repository 'deb [arch=amd64,arm64,ppc64el] https://mirror.kku.ac.th/mariadb/repo/10.3/ubuntu bionic main'
+databasepkg="mariadb-client mariadb-server"
+
+apt install -y $databasepkg apache2 apache2-utils libapache2-mpm-itk openssl php5.6-fpm php5.6-{curl,common,xml,bcmath,bz2,intl,gd,mbstring,mysql,zip,json} php7.0-fpm  php7.0-{curl,common,xml,bcmath,bz2,intl,gd,mbstring,mysql,zip,json} php7.1-fpm php7.1-{curl,common,xml,bcmath,bz2,intl,gd,mbstring,mysql,zip,json} php7.2 php7.2-fpm php7.2-{curl,common,xml,bcmath,bz2,intl,gd,mbstring,mysql,zip,json} php7.3-fpm php7.3-{curl,common,xml,bcmath,bz2,intl,gd,mbstring,mysql,zip,json} php7.4-fpm php7.4-{curl,common,xml,bcmath,bz2,intl,gd,mbstring,mysql,zip,json} php8.0-fpm php8.0-{curl,common,xml,bcmath,bz2,intl,gd,mbstring,mysql,zip} php8.1-fpm php8.1-{curl,common,xml,bcmath,bz2,intl,gd,mbstring,mysql,zip}
+cat << EOT >  /etc/apache2/conf-available/php-fpm.conf
+<IfModule mod_fastcgi.c>
+        AddHandler php7-fcgi .php
+        Action php7-fcgi /php7-fcgi
+        Alias /php7-fcgi /usr/lib/cgi-bin/php7-fcgi
+        FastCgiExternalServer /usr/lib/cgi-bin/php7-fcgi -socket /run/php/php7.4-fpm.sock -pass-header Authorization -idle-timeout 60
+        <Directory /usr/lib/cgi-bin>
+                Require all granted
+        </Directory>
+</IfModule>
+EOT
+a2enmod "proxy proxy_fcgi setenvif actions alias auth_basic env expires headers http2 mime ssl rewrite request mpm_itk"
+a2enconf  "php-fpm php5.6-fpm php7.0-fpm php7.1-fpm  php7.2-fpm php7.3-fpm php7.4-fpm php8.0-fpm php8.1-fpm"
+
+for i in 5.6 7.0 7.1 7.2 7.3 7.4 8.0 8.1
+do
+cp $CONFDIR/phpini-templates/php$i.conf /etc/php/$i/fpm/php.ini
+done
+
+sed -i '/#<Directory/i \
+<Directory /home/*/public_html/> \
+Options Indexes FollowSymLinks \
+AllowOverride ALL \
+Require all granted \
+</Directory>' /etc/apache2/apache2.conf
+
+curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+chmod +x wp-cli.phar
+mv wp-cli.phar '/usr/local/bin/wp'
+mkdir -p /etc/ssl/selfsigned
+cp "$CONFDIR/openssl/ca-bundle.pem" "/etc/ssl/selfsigned/ca-bundle.pem"
+chmod +x "$CONFDIR/openssl/getcert.sh"
+rm -rf /usr/share/phpmyadmin
+mkdir -p /usr/share/phpmyadmin
+wget https://files.phpmyadmin.net/phpMyAdmin/5.1.1/phpMyAdmin-5.1.1-all-languages.zip -O /usr/share/phpmyadmin/phpmyadmin5.1.1.zip
+
+cd /usr/share/phpmyadmin/ && unzip phpmyadmin5.1.1.zip&& mv phpMyAdmin-5.1.1-all-languages/* .
+cp /usr/share/phpmyadmin/config.sample.inc.php /usr/share/phpmyadmin/config.inc.php
+touch /etc/apache2/conf-available/phpmyadmin.conf
+
+cat << EOT > /etc/apache2/conf-available/phpmyadmin.conf
+Alias /phpmyadmin /usr/share/phpmyadmin
+
+<Directory /usr/share/phpmyadmin>
+    Options FollowSymLinks
+    DirectoryIndex index.php
+    AllowOverride all
+</Directory>
+<Directory /usr/share/phpmyadmin/setup>
+    Require all denied
+</Directory>
+
+<Directory /usr/share/phpmyadmin/libraries>
+    Require all denied
+</Directory>
+EOT
+a2enconf phpmyadmin
+mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'qualdev'@'localhost' IDENTIFIED BY 'P@q2w3efg';"
+mysql -e "FLUSH PRIVILEGES;"
+service php5.6-fpm restart && service php7.0-fpm restart && service php7.1-fpm restart && service php7.2-fpm restart && service php7.3-fpm restart && service php7.4-fpm restart && service php8.0-fpm restart && service php8.1-fpm restart && service apache2 restart
+systemctl enable apache2 && systemctl enable php5.6-fpm && systemctl enable php7.0-fpm &&  systemctl enable php7.1-fpm &&  systemctl enable php7.2-fpm && systemctl enable php7.3-fpm && systemctl enable php7.3-fpm && systemctl enable php7.3-fpm && systemctl enable php7.4-fpm && systemctl enable php8.0-fpm && systemctl enable php8.1-fpm
+

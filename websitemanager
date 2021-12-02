@@ -1,0 +1,363 @@
+#!/bin/bash
+
+# ---------------------------------------------------------------------------- #
+# GLOBAL VARIABLES (in script)                                                 #
+# ---------------------------------------------------------------------------- #
+
+CONFDIR="/opt/websitemanager"
+DOMAIN=''
+# red output
+RED='\033[0;31m'
+# green output
+GREEN='\033[0;32m'
+# Yellow outpu
+YELLOW='\033[0;33m'
+# No Color
+NC='\033[0m'
+POOL_TEMPLATE="/opt/websitemanager/phpini-templates/php-fpm.conf"
+HAS_POOL_TEMPLATE="0"
+
+# ---------------------------------------------------------------------------- #
+# FUNCTIONS                                                                    #
+# ---------------------------------------------------------------------------- #
+
+#
+# Echoes a red message
+#
+echo-red() {
+    echo -e "${RED}$1${NC}"
+}
+
+#
+# Echoes a green message
+#
+echo-green() {
+    echo -e "${GREEN}$1${NC}"
+}
+
+#
+# Echoes a yellow message
+#
+echo-yellow() {
+    echo -e "${YELLOW}$1${NC}"
+}
+
+
+#
+# Shows info on the authors and the program
+#
+websitemanager-credits() {
+
+    echo -e "${GREEN}"
+    cat <<splash
+##############################################################################
+##############################################################################
+# websitemanager v1.0.0 Created by LKY Rajpurohit <qualdev.laxman@gmail.com> #
+##############################################################################
+##############################################################################
+
+splash
+    echo -e "${NC}"
+
+}
+
+#
+# Verifies sudo 
+#
+websitemanager-verify-sudo() {
+
+    if [ "$EUID" -ne 0 ]
+      then echo-red "Please execute as root eg: sudo"
+      echo-red "else contact server administrator"	    
+      exit 1
+    fi
+
+}
+
+#
+# Shows usage information to user
+#
+websitemanager-usage() {
+
+    echo -e "${YELLOW}"
+    cat <<"USAGE"
+
+Uso: websitemanager [options] <name of vhost>
+    -h		|--help   help
+    -d          domain of the project eg: site.dev
+    -l          list all vhosts
+    -t          set vhost template like default. laravel, nodejs
+    -pv         set php version vhost
+    -p          sets the application's port for nodejs/proxy
+    -install    install the script globally
+    -update     Autoupdate script if is needed
+
+
+USAGE
+
+    echo "Examples:"
+    echo
+    echo-yellow "for creating a vhost domain \"sitename.dev\" with the template \"laravel\" with php version 7.2 and node proxy port 3000"
+    echo-green "sudo websitemanager -d sitename.dev -t laravel -pv 7.2 -p 3000"
+    echo
+    echo-yellow "Remove the vhost \"sitename.conf\" and remove the domain of \"/etc/hosts\""
+    echo-green "sudo websitemanager -rm sitename.dev"
+
+    echo -e "${NC}"
+    exit 0
+
+}
+
+#
+# install script, instal option to add the script in bin directory
+#
+websitemanager-install() {
+    websitemanager-verify-sudo;
+
+    if [ ! -e  "$CONFDIR" ]; then
+        mkdir "$CONFDIR"
+    fi
+
+    #cp template.conf template-phpfpm.conf template-pool.conf $CONFDIR
+    cp -r $(pwd)/. $CONFDIR
+    ln -s -f $CONFDIR/websitemanager /usr/bin/websitemanager
+    ln -s -f $CONFDIR/systemmanager /usr/bin/systemmanager
+
+    echo-green "Script installed! use: websitemanager"
+
+    exit 0
+
+}
+
+#
+# Update Vhost
+#
+websitemanager-update() {
+    websitemanager-verify-sudo;
+    cd /opt/websitemanager
+    git checkout .
+    git remote update > /dev/null
+    needUpdate=$(git status -uno | grep -c "git pull")
+
+    if [ "$needUpdate" -ne 0 ]; then
+        echo-yellow "Need update..."
+        git pull origin master > /dev/null
+        echo-green "Update complete!"
+    else
+        echo-green "Already updated!"
+    fi
+
+    exit 0
+}
+
+
+
+#
+# List avaliable and enabled vhosts
+#
+websitemanager-list() {
+
+    echo-yellow "Virtual hosts avaliable:"
+    ls -1 "/etc/apache2/sites-available/"
+
+    echo-green "Virtual hosts enabled:"
+    ls -1 "/etc/apache2/sites-enabled/"
+
+    exit 0
+
+}
+
+
+
+#
+# Validate template's existance
+#
+websitemanager-template() {
+    websitemanager-verify-sudo;
+    echo-green "Verifying template..."
+
+
+        if [ ! -f "/opt/websitemanager/vhosttemplates/$TEMPLATE" ]; then
+            echo-red "$TEMPLATE not found!"
+            exit 1
+        fi
+    	if [ $HAS_POOL_TEMPLATE = "1" ]; then
+        echo-green "Verifying pool template..."
+
+        if [ ! -f "/opt/websitemanager/phpini-templates/php-fpm.conf" ]; then
+                echo-red "$POOL_TEMPLATE not found!"
+                exit 1
+           
+        fi
+    fi
+
+}
+
+
+websitemanager-getusername() {
+username=$(logname)
+}
+#
+# Creates a new vhost in sites available of apache
+#
+websitemanager-generate-vhost() {
+    websitemanager-verify-sudo;
+    echo-green "Creating $DOMAIN virtual host."
+    	
+    APACHE_CONF="/etc/apache2/sites-available/$DOMAIN.conf"
+
+    cp  $CONFDIR/vhosttemplates/$TEMPLATE $APACHE_CONF
+    sed -i 's#$domain#'$DOMAIN'#g' $APACHE_CONF
+    sed -i 's#$php_version#'$PHP_VERSION'#g' $APACHE_CONF
+    sed -i 's#$username#'$username'#g' $APACHE_CONF
+    sed -i 's#$port#'$PORT'#g' $APACHE_CONF
+    if [ "$TEMPLATE" == "laravel.conf" ]; then
+        mkdir -p /home/$username/public_html/sites/$DOMAIN/public
+    	mkdir -p /home/$username/public_html/logs/$DOMAIN
+    	chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
+    	chown -R $username:$username /home/$username/public_html/sites/$DOMAIN
+    else
+      mkdir -p /home/$username/public_html/sites/$DOMAIN
+      mkdir -p /home/$username/public_html/logs/$DOMAIN
+      chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
+      chown -R $username:$username /home/$username/public_html/sites/$DOMAIN
+    fi
+
+    if [ $HAS_POOL_TEMPLATE = "1" ]; then
+        websitemanager-generate-pool;
+    fi
+
+    if [ ! -f $APACHE_CONF  ]; then
+        echo-red "Fail, aborting..."
+        exit 1
+    fi
+
+}
+
+websitemanager-generate-pool() {
+    websitemanager-verify-sudo;
+    echo-green "Creating PHP-FPM config for virtual host."
+    cp $POOL_TEMPLATE /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
+    sed -i 's#$domain#'$DOMAIN'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
+    sed -i 's#$php_version#'$PHP_VERSION'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
+    sed -i 's#$USER#'$username'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
+    service php$PHP_VERSION-fpm restart 
+}
+
+websitemanager-remove() {
+    websitemanager-verify-sudo;
+    FPM_POOL_CONF="/etc/$PHP_VERSION/fpm/pool.d/$CONFNAME"
+
+    echo-yellow "revoming domain from /etc/hosts."
+    sed -i '/'$DOMAIN'/d' /etc/hosts
+
+    echo-yellow "disabling  $DOMAIN virtual host."
+    a2dissite $CONFNAME
+
+    rm "/etc/apache2/sites-available/$CONFNAME"
+    service apache2 reload
+
+    if [ -f "$FPM_POOL_CONF" ]; then
+        echo-yellow "removing php-fpm associaed with $DOMAIN"
+        rm "$FPM_POOL_CONF"
+        service php$PHP_VERSION-fpm restart
+    fi
+
+    exit 0
+
+}
+
+#
+#  Adds the new vhost domain in hosts file
+#
+websitemanager-point-ip() {
+    websitemanager-verify-sudo;
+    HOSTS_PATH="/etc/hosts"
+
+    echo-green "pointing $DOMAIN  via /etc/hosts ..."
+
+    if grep -F "$DOMAIN" $HOSTS_PATH
+    then
+        echo-yellow "Domain already exists"
+    else
+        sed -i '1s/^/127.0.0.1       '$DOMAIN'\n/' $HOSTS_PATH
+    fi
+
+}
+
+websitemanager-ssl-generate() {
+cd "$CONFDIR/openssl"
+./getcert.sh $DOMAIN
+}
+#
+# Reloads apache server andm php5-fpm, if required
+#
+websitemanager-enable-reload() {
+    websitemanager-verify-sudo;
+    a2ensite $DOMAIN
+
+    service apache2 reload
+
+    echo-green "Virtual host $DOMAIN created you can access via https://$DOMAIN"
+
+    if [ $HAS_POOL_TEMPLATE = "1" ]; then
+        service php$PHP_VERSION-fpm restart
+        echo-green "Pool for site with host and pool $CONFNAME enabled"
+    fi
+
+
+}
+
+#
+# Initial script
+#
+while [ $1 ]; do
+    case "$1" in
+        '-l') websitemanager-list;;
+        '-h'|'--help') websitemanager-usage;;
+        '-t') TEMPLATE="$2.conf";;
+        '-pv')
+            PHP_VERSION="$2"
+            HAS_POOL_TEMPLATE="1"
+            ;;
+        '-p') PORT="$2";;    
+        '-d') DOMAIN="$2";;
+        '-install') websitemanager-install;;
+        '-update') websitemanager-update;;
+    esac
+    shift
+done
+
+#
+# Loop to read options and arguments
+#
+
+
+#
+# Verify the parameters usage
+#
+if [ "$DOMAIN" == "" ]; then
+    echo-red "You need to specify the options"
+    websitemanager-usage;
+    exit 0;
+fi
+if [ "$PHP_VERSION" == "" ]; then
+    PHP_VERSION="8.0"
+fi
+if [ "$TEMPLATE" == "" ]; then
+    TEMPLATE="default.conf"
+fi
+if [ "$PORT" == "" ]; then
+    PORT="3000"
+fi
+#
+# Do vhost creation process
+#
+websitemanager-getusername
+websitemanager-template;
+websitemanager-generate-vhost;
+websitemanager-generate-pool;
+websitemanager-point-ip;
+websitemanager-ssl-generate;
+websitemanager-enable-reload;
+exit 0
