@@ -89,6 +89,7 @@ Uso: websitemanager [options] <name of vhost>
     -t          set vhost template like default. laravel, nodejs
     -pv         set php version vhost
     -p          sets the application's port for nodejs/proxy
+    -u          set domain for the system user like you(anil, vijay, nitin)  
     -install    install the script globally
     -update     Autoupdate script if is needed
 
@@ -98,10 +99,11 @@ USAGE
     echo "Examples:"
     echo
     echo-yellow "Example: for creating a vhost domain \"sitename.dev\" with the template \"laravel\" and php version 7.2 use below command"
-    echo-green "sudo websitemanager -d sitename.dev -t laravel -pv 7.2 -p 3000
+    echo-green "sudo websitemanager -d sitename.dev -t laravel -pv 7.2 #without -pv it will set php8.0 as default php version"
     echo
     echo-yellow "Example: for creating a vhost domain \"sitename.dev\" with the template \"node\" with proxy port 3000"
-    echo-green "sudo websitemanager -d sitename.dev -t node" //it will use default port 3000, but you can change port by -p 3001 
+    echo-green "sudo websitemanager -d sitename.dev -t node" #it will use default port 3000, but you can change port by -p 3001 as following command 
+    echo-green "sudo websitemanager -d sitename.dev -t node -p 3001" #it will use default port 3000, but you can change port by -p 3001
     echo-yellow "Remove the vhost \"sitename.conf\" and remove the domain of \"/etc/hosts\""
     #echo-green "sudo websitemanager -rm sitename.dev"
 
@@ -125,7 +127,7 @@ websitemanager-install() {
     ln -s -f $CONFDIR/websitemanager /usr/bin/websitemanager
     ln -s -f $CONFDIR/systemmanager /usr/bin/systemmanager
 
-    echo-green "Script installed! use: websitemanager"
+    echo-green "Script installed! use: websitemanager -h"
 
     exit 0
 
@@ -197,11 +199,13 @@ websitemanager-template() {
 
 
 websitemanager-getusername() {
-if [ $username = " " ]; then
+if [ "$USERNAME" == "" ]; then
     username=$(logname)
 else
-username=
+    username="$USERNAME"
+fi
 }
+
 #
 # Creates a new vhost in sites available of apache
 #
@@ -213,15 +217,17 @@ websitemanager-generate-vhost() {
 
     cp  $CONFDIR/vhosttemplates/$TEMPLATE $APACHE_CONF
     sed -i 's#$domain#'$DOMAIN'#g' $APACHE_CONF
-    sed -i 's#$php_version#'$PHP_VERSION'#g' $APACHE_CONF
     sed -i 's#$username#'$username'#g' $APACHE_CONF
-    sed -i 's#$port#'$PORT'#g' $APACHE_CONF
     if [ "$TEMPLATE" == "laravel.conf" ]; then
+       sed -i 's#$php_version#'$PHP_VERSION'#g' $APACHE_CONF
         mkdir -p /home/$username/public_html/sites/$DOMAIN/public
     	mkdir -p /home/$username/public_html/logs/$DOMAIN
     	chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
     	chown -R $username:$username /home/$username/public_html/sites/$DOMAIN
+    else [ "$TEMPLATE" == "node.conf" ]; then
+    sed -i 's#$port#'$PORT'#g' $APACHE_CONF
     else
+      sed -i 's#$php_version#'$PHP_VERSION'#g' $APACHE_CONF
       mkdir -p /home/$username/public_html/sites/$DOMAIN
       mkdir -p /home/$username/public_html/logs/$DOMAIN
       chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
@@ -253,7 +259,7 @@ websitemanager-remove() {
     websitemanager-verify-sudo;
     FPM_POOL_CONF="/etc/$PHP_VERSION/fpm/pool.d/$CONFNAME"
 
-    echo-yellow "revoming domain from /etc/hosts."
+    echo-yellow "removing domain from /etc/hosts."
     sed -i '/'$DOMAIN'/d' /etc/hosts
 
     echo-yellow "disabling  $DOMAIN virtual host."
@@ -313,6 +319,31 @@ websitemanager-enable-reload() {
 
 }
 
+verifyuserinput(){
+echo-green "=============================================================================="
+echo-green
+echo-green "Domain: $DOMAIN"
+echo-green "Template: $TEMPLATE"
+echo-green "Username: $USERNAME";
+echo-yellow "Document root: will be at /home/$USERNAME/public_html/sites/$DOMAIN"
+echo-green "Port: $PORT"
+echo-green "Php_Version: $PHP_VERSION"
+echo-green
+echo-green "=============================================================================="
+echo-green
+echo-red "" 
+#read answer
+read -p "Would you like to create domain/site with above configuration (y/n)?" answer
+case ${answer:0:1} in
+    y|Y )
+        echo Yes
+    ;;
+    * )
+       exit 1
+    ;;
+esac
+}
+
 #
 # Initial script
 #
@@ -327,21 +358,12 @@ while [ $1 ]; do
             ;;
         '-p') PORT="$2";;    
         '-d') DOMAIN="$2";;
-        '-u') USERNAME="$3";;
+        '-u') USERNAME="$2";;
         '-install') websitemanager-install;;
         '-update') websitemanager-update;;
     esac
     shift
 done
-echo $USERNAME
-echo $DOMAIN
-echo $PORT
-echo $PHP_VERSION
-exit 1
-#
-# Loop to read options and arguments
-#
-
 
 #
 # Verify the parameters usage
@@ -351,22 +373,23 @@ if [ "$DOMAIN" == "" ]; then
     websitemanager-usage;
     exit 0;
 fi
+
 if [ "$PHP_VERSION" == "" ]; then
     PHP_VERSION="8.0"
 fi
+
 if [ "$TEMPLATE" == "" ]; then
     TEMPLATE="default.conf"
 fi
-if [ "$TEMPLATE" == "" ]; then
-    TEMPLATE="default.conf"
-fi
+
 if [ "$PORT" == "" ]; then
     PORT="3000"
 fi
 #
 # Do vhost creation process
 #
-websitemanager-getusername
+websitemanager-getusername;
+verifyuserinput;
 websitemanager-template;
 websitemanager-generate-vhost;
 websitemanager-generate-pool;
