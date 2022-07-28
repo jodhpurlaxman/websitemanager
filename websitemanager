@@ -97,11 +97,13 @@ USAGE
 
     echo "Examples:"
     echo
-    echo-yellow "for creating a vhost domain \"sitename.dev\" with the template \"laravel\" with php version 7.2 and node proxy port 3000"
-    echo-green "sudo websitemanager -d sitename.dev -t laravel -pv 7.2 -p 3000"
+    echo-yellow "Example: for creating a vhost domain \"sitename.dev\" with the template \"laravel\" and php version 7.2 use below command"
+    echo-green "sudo websitemanager -d sitename.dev -t laravel -pv 7.2 -p 3000
     echo
+    echo-yellow "Example: for creating a vhost domain \"sitename.dev\" with the template \"node\" with proxy port 3000"
+    echo-green "sudo websitemanager -d sitename.dev -t node" //it will use default port 3000, but you can change port by -p 3001 
     echo-yellow "Remove the vhost \"sitename.conf\" and remove the domain of \"/etc/hosts\""
-    echo-green "sudo websitemanager -rm sitename.dev"
+    #echo-green "sudo websitemanager -rm sitename.dev"
 
     echo -e "${NC}"
     exit 0
@@ -195,7 +197,10 @@ websitemanager-template() {
 
 
 websitemanager-getusername() {
-username=$(logname)
+if [ $username = " " ]; then
+    username=$(logname)
+else
+username=
 }
 #
 # Creates a new vhost in sites available of apache
@@ -322,12 +327,17 @@ while [ $1 ]; do
             ;;
         '-p') PORT="$2";;    
         '-d') DOMAIN="$2";;
+        '-u') USERNAME="$3";;
         '-install') websitemanager-install;;
         '-update') websitemanager-update;;
     esac
     shift
 done
-
+echo $USERNAME
+echo $DOMAIN
+echo $PORT
+echo $PHP_VERSION
+exit 1
 #
 # Loop to read options and arguments
 #
@@ -343,6 +353,9 @@ if [ "$DOMAIN" == "" ]; then
 fi
 if [ "$PHP_VERSION" == "" ]; then
     PHP_VERSION="8.0"
+fi
+if [ "$TEMPLATE" == "" ]; then
+    TEMPLATE="default.conf"
 fi
 if [ "$TEMPLATE" == "" ]; then
     TEMPLATE="default.conf"
