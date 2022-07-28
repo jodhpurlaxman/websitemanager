@@ -68,10 +68,6 @@ systemmanager-install() {
     cp -r $(pwd)/. $CONFDIR
     ln -s -f $CONFDIR/websitemanager /usr/bin/websitemanager
     ln -s -f $CONFDIR/systemmanager /usr/bin/systemmanager
-    if grep "%developers" /etc/sudoers;then echo-green "developers group already exists in sudoers" fi;
-    else
-    echo "%developers ALL = NOPASSWD: /bin/systemctl restart apache2.service, /opt/websitemanager/websitemanager, /opt/websitemanager/systemmanager, /bin/kill" >> /etc/sudoers
-    fi
     echo-green "Script installed! use: systemmanager and websitemanager"
 
     exit 0
