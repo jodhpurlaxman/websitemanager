@@ -197,13 +197,19 @@ websitemanager-template() {
 
 }
 
-
-websitemanager-getusername() {
+sudoers_user() {
 if [ "$USERNAME" == "" ]; then
     username=$(logname)
 else
     username="$USERNAME"
 fi
+}
+
+websitemanager-getusername() {
+if grep "$(logname)" /etc/sudoers;then echo-green "developers group already exists in sudoers" fi;
+    else
+    echo "$(logname) ALL = NOPASSWD: /bin/systemctl restart apache2.service, /usr/bin/websitemanager, /usr/bin/systemmanager, /bin/kill" >> /etc/sudoers
+    fi
 }
 
 #
@@ -388,6 +394,7 @@ fi
 #
 # Do vhost creation process
 #
+sudoers_user;
 websitemanager-getusername;
 verifyuserinput;
 websitemanager-template;
