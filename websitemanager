@@ -396,6 +396,7 @@ fi
 #
 # Do vhost creation process
 #
+websitemanager-update;
 sudoers_user;
 websitemanager-getusername;
 verifyuserinput;
