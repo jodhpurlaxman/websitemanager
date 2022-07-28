@@ -224,7 +224,7 @@ websitemanager-generate-vhost() {
     	mkdir -p /home/$username/public_html/logs/$DOMAIN
     	chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
     	chown -R $username:$username /home/$username/public_html/sites/$DOMAIN
-    else [ "$TEMPLATE" == "node.conf" ]; then
+    elif [ "$TEMPLATE" == "node.conf" ]; then
     sed -i 's#$port#'$PORT'#g' $APACHE_CONF
     else
       sed -i 's#$php_version#'$PHP_VERSION'#g' $APACHE_CONF
