@@ -197,7 +197,8 @@ websitemanager-template() {
 
 }
 
-sudoers_user() {
+websitemanager-getusername() {
+websitemanager-verify-sudo;
 if [ "$USERNAME" == "" ]; then
     username=$(logname)
 else
@@ -205,7 +206,8 @@ else
 fi
 }
 
-websitemanager-getusername() {
+sudoers_user() {
+websitemanager-verify-sudo;
 if grep "$(logname)" /etc/sudoers;then echo-green "developers group already exists in sudoers" fi;
     else
     echo "$(logname) ALL = NOPASSWD: /bin/systemctl restart apache2.service, /usr/bin/websitemanager, /usr/bin/systemmanager, /bin/kill" >> /etc/sudoers
