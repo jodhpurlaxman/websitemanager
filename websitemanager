@@ -150,8 +150,6 @@ websitemanager-update() {
     else
         echo-green "Local repo is already updated!"
     fi
-
-    exit 0
 }
 
 
