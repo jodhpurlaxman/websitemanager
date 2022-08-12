@@ -16,7 +16,7 @@ YELLOW='\033[0;33m'
 NC='\033[0m'
 POOL_TEMPLATE="/opt/websitemanager/phpini-templates/php-fpm.conf"
 HAS_POOL_TEMPLATE="0"
-
+USERNAME=""
 # ---------------------------------------------------------------------------- #
 # FUNCTIONS                                                                    #
 # ---------------------------------------------------------------------------- #
@@ -228,7 +228,7 @@ websitemanager-generate-vhost() {
     sed -i 's#$username#'$username'#g' $APACHE_CONF
     if [ "$TEMPLATE" == "laravel.conf" ]; then
        sed -i 's#$php_version#'$PHP_VERSION'#g' $APACHE_CONF
-        mkdir -p /home/$username/public_html/sites/$DOMAIN/public
+        mkdir -p /home/$username/public_html/sites/$DOMAIN/
     	mkdir -p /home/$username/public_html/logs/$DOMAIN
     	chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
     	chown -R $username:$username /home/$username/public_html/sites/$DOMAIN
@@ -327,14 +327,52 @@ websitemanager-enable-reload() {
 
 }
 
+install_framework(){
+ if [ -z "$(ls -A /home/$username/public_html/sites/$DOMAIN)" ]; then
+    echo "Empty"
+ else
+    echo-red "warning: document root directory is not empty, exiting installer"
+    exit 1
+ fi      
+    
+if [ "$FRAMEWORK" == "laravel" ]; then
+    echo-green "================================="
+    echo-green "downloading and installing Laravel"	
+ 	composer create-project laravel/laravel "/home/$username/public_html/sites/$DOMAIN"
+	chown -R $username:$username "/home/$username/public_html/sites/$DOMAIN"
+    temp_DB=${DOMAIN%.*}
+    #DB=$(echo ${username}'_'${temp_DB})
+    DB=${username}_${temp_DB} 
+    sudo mysql -e "CREATE DATABASE $DB;"
+elif [ "$FRAMEWORK" == "wordpress" ]; then
+	cd /tmp
+    echo-green "=================================="
+	echo-green "downloading and installing wordpress"	
+    curl https://wordpress.org/latest.tar.gz -o latest.tar.gz && tar -xzf latest.tar.gz -C "/home/$username/public_html/sites/$DOMAIN" --strip-components=1
+    
+    temp_DB=${DOMAIN%.*}
+    #DB=$(echo ${username}'_'${temp_DB})
+    DB=${username}_${temp_DB} 
+    sudo mysql -e "CREATE DATABASE $DB;"
+    cp /home/$username/public_html/sites/$DOMAIN/wp-config-sample.php /home/$username/public_html/sites/$DOMAIN/wp-config.php
+    sed -i 's/database_name_here/'$DB'/' /home/$username/public_html/sites/$DOMAIN/wp-config.php
+    sed -i 's/username_here/qualdev/' /home/$username/public_html/sites/$DOMAIN/wp-config.php
+    sed -i 's/password_here/P@q2w3efg/' /home/$username/public_html/sites/$DOMAIN/wp-config.php
+    chown -R $username:$username "/home/$username/public_html/sites/$DOMAIN"
+else 
+	echo-yellow "No framework passed for auto installation"	
+fi
+}
+
 verifyuserinput(){
 echo-green "=============================================================================="
 echo-green
+echo-green "Username: $username";
 echo-green "Domain: $DOMAIN"
 echo-green "Template: $TEMPLATE"
-echo-green "Username: $USERNAME";
+echo-green "Framework: $FRAMEWORK //if framework defined it will set Template based on value of Framework"
 echo-yellow "Document root: will be at /home/$USERNAME/public_html/sites/$DOMAIN"
-echo-green "Port: $PORT"
+echo-green "Port: $PORT"  # this will work if template is node
 echo-green "Php_Version: $PHP_VERSION"
 echo-green
 echo-green "=============================================================================="
@@ -360,6 +398,7 @@ while [ $1 ]; do
         '-l') websitemanager-list;;
         '-h'|'--help') websitemanager-usage;;
         '-t') TEMPLATE="$2.conf";;
+	'-f') FRAMEWORK="$2";;
         '-pv')
             PHP_VERSION="$2"
             HAS_POOL_TEMPLATE="1"
@@ -382,12 +421,21 @@ if [ "$DOMAIN" == "" ]; then
     exit 0;
 fi
 
+#if [ "$USERNAME" != "" ]; then
+#    echo "username khali hai"
+#    websitemanager-getusername
+#fi
+
+
 if [ "$PHP_VERSION" == "" ]; then
     PHP_VERSION="8.0"
 fi
 
 if [ "$TEMPLATE" == "" ]; then
     TEMPLATE="default.conf"
+fi
+if [ "$FRAMEWORK" == "laravel" ]; then
+    TEMPLATE="laravel.conf"
 fi
 
 if [ "$PORT" == "" ]; then
@@ -406,4 +454,5 @@ websitemanager-generate-pool;
 websitemanager-point-ip;
 websitemanager-ssl-generate;
 websitemanager-enable-reload;
+install_framework;
 exit 0
