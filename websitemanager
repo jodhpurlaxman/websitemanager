@@ -148,7 +148,7 @@ websitemanager-update() {
         git pull origin master > /dev/null
         echo-green "Update complete!"
     else
-        echo-green "Already updated!"
+        echo-green "Local repo is already updated!"
     fi
 
     exit 0
