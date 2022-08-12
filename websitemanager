@@ -99,7 +99,7 @@ USAGE
     echo "Examples:"
     echo
     echo-yellow "Example: for creating a vhost domain \"sitename.dev\" with the template \"laravel\" and php version 7.2 use below command"
-    echo-green "sudo websitemanager -d sitename.dev -t laravel -pv 7.2 #without -pv it will set php8.0 as default php version"
+    echo-green "sudo websitemanager -d sitename.dev -t default/laravel/node -f laravel/wordpress -pv 7.2  -u username #without -pv it will set php8.0 as default php version, if framework not defined it will not install it"
     echo
     echo-yellow "Example: for creating a vhost domain \"sitename.dev\" with the template \"node\" with proxy port 3000"
     echo-green "sudo websitemanager -d sitename.dev -t node" #it will use default port 3000, but you can change port by -p 3001 as following command 
@@ -369,7 +369,7 @@ echo-green "Username: $username";
 echo-green "Domain: $DOMAIN"
 echo-green "Template: $TEMPLATE"
 echo-green "Framework: $FRAMEWORK //if framework defined it will set Template based on value of Framework"
-echo-yellow "Document root: will be at /home/$USERNAME/public_html/sites/$DOMAIN"
+echo-yellow "Document root: will be at /home/$username/public_html/sites/$DOMAIN"
 echo-green "Port: $PORT"  # this will work if template is node
 echo-green "Php_Version: $PHP_VERSION"
 echo-green
