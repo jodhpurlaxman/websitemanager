@@ -147,6 +147,8 @@ websitemanager-update() {
         echo-yellow "Need update..."
         git pull origin master > /dev/null
         echo-green "Update complete!"
+        echo-red "Please re-run same command"
+        exit 0
     else
         echo-green "Local repo is already updated!"
     fi
@@ -206,10 +208,11 @@ fi
 
 sudoers_user() {
 websitemanager-verify-sudo;
-if grep "$(logname)" /etc/sudoers;then echo-green "developers group already exists in sudoers" fi;
-    else
+if ! grep -q grep "$(logname)" /etc/sudoers; then
     echo "$(logname) ALL = NOPASSWD: /bin/systemctl restart apache2.service, /usr/bin/websitemanager, /usr/bin/systemmanager, /bin/kill" >> /etc/sudoers
-    fi
+    
+else
+fi
 }
 
 #
