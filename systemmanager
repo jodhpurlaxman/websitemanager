@@ -54,9 +54,7 @@ systemmanager-verify-sudo() {
     fi
 
 }
-systemmanager-getusername() {
-username=$(logname)
-}
+
 systemmanager-install() {
     systemmanager-verify-sudo;
 
@@ -69,8 +67,6 @@ systemmanager-install() {
     ln -s -f $CONFDIR/websitemanager /usr/bin/websitemanager
     ln -s -f $CONFDIR/systemmanager /usr/bin/systemmanager
     echo-green "Script installed! use: systemmanager and websitemanager"
-
-    exit 0
 }
 #
 # Shows info on the authors and the program
@@ -89,6 +85,7 @@ splash
 
 }
 systemmanager-credits;
+systemmanager-install;
 
 apt update
 commonpkg="git unzip bind9 filezilla cifs-utils resolvconf openssh-server composer git build-essential libtool autoconf software-properties-common curl wget gcc g++ make dirmngr apt-transport-https"
@@ -121,6 +118,7 @@ a2enconf  "php-fpm php5.6-fpm php7.0-fpm php7.1-fpm  php7.2-fpm php7.3-fpm php7.
 for i in 5.6 7.0 7.1 7.2 7.3 7.4 8.0 8.1
 do
 cp $CONFDIR/phpini-templates/php$i.conf /etc/php/$i/fpm/php.ini
+rm -f /etc/php/$i/fpm/pool.d/www.conf
 done
 sed -i '/#<Directory/i \
 <Directory /home/*/public_html/> \
