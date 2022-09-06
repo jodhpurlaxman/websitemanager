@@ -137,9 +137,9 @@ cp "$CONFDIR/openssl/ca-bundle.pem" "/etc/ssl/selfsigned/ca-bundle.pem"
 chmod +x "$CONFDIR/openssl/getcert.sh"
 rm -rf /usr/share/phpmyadmin
 mkdir -p /usr/share/phpmyadmin
-wget https://files.phpmyadmin.net/phpMyAdmin/5.1.1/phpMyAdmin-5.1.1-all-languages.zip -O /usr/share/phpmyadmin/phpmyadmin5.1.1.zip
+wget https://files.phpmyadmin.net/phpMyAdmin/5.2.0/phpMyAdmin-5.2.0-all-languages.zip -O /usr/share/phpmyadmin/phpmyadmin5.2.0.zip
 
-cd /usr/share/phpmyadmin/ && unzip -qq phpmyadmin5.1.1.zip&& mv phpMyAdmin-5.1.1-all-languages/* .
+cd /usr/share/phpmyadmin/ && unzip -qq phpmyadmin5.2.0.zip&& mv phpMyAdmin-5.2.0-all-languages/* .
 cp /usr/share/phpmyadmin/config.sample.inc.php /usr/share/phpmyadmin/config.inc.php
 cp $CONFDIR/phpini-templates/default-php-fpm.conf /etc/php/7.4/fpm/pool.d/default-php-fpm.conf
 touch /etc/apache2/conf-available/phpmyadmin.conf
