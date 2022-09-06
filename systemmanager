@@ -8,7 +8,7 @@
 RED='\033[0;31m'
 # green output
 GREEN='\033[0;32m'
-# Yellow outpu
+# Yellow output
 YELLOW='\033[0;33m'
 # No Color
 NC='\033[0m'
@@ -81,7 +81,7 @@ systemmanager-credits() {
     cat <<splash
 ##############################################################################
 ##############################################################################
-##systemmanager v1.0.0 Created by LKY Rajpurohit <qualdev.laxman@gmail.com>###
+##systemmanager v1.9.0 Created by LKY Rajpurohit <qualdev.laxman@gmail.com>###
 ##############################################################################
 ##############################################################################
 splash
@@ -109,7 +109,7 @@ cat << EOT >  /etc/apache2/conf-available/php-fpm.conf
         AddHandler php7-fcgi .php
         Action php7-fcgi /php7-fcgi
         Alias /php7-fcgi /usr/lib/cgi-bin/php7-fcgi
-        FastCgiExternalServer /usr/lib/cgi-bin/php7-fcgi -socket /run/php/php7.4-fpm.sock -pass-header Authorization -idle-timeout 60
+        FastCgiExternalServer /usr/lib/cgi-bin/php7-fcgi -socket /run/php/php7.4-fpm.sock -pass-header Authorization -idle-timeout 600
         <Directory /usr/lib/cgi-bin>
                 Require all granted
         </Directory>
@@ -142,8 +142,8 @@ wget https://files.phpmyadmin.net/phpMyAdmin/5.1.1/phpMyAdmin-5.1.1-all-language
 
 cd /usr/share/phpmyadmin/ && unzip phpmyadmin5.1.1.zip&& mv phpMyAdmin-5.1.1-all-languages/* .
 cp /usr/share/phpmyadmin/config.sample.inc.php /usr/share/phpmyadmin/config.inc.php
+cp 
 touch /etc/apache2/conf-available/phpmyadmin.conf
-
 cat << EOT > /etc/apache2/conf-available/phpmyadmin.conf
 Alias /phpmyadmin /usr/share/phpmyadmin
 
@@ -151,6 +151,9 @@ Alias /phpmyadmin /usr/share/phpmyadmin
     Options FollowSymLinks
     DirectoryIndex index.php
     AllowOverride all
+    <FilesMatch \.php$>
+                SetHandler "proxy:unix:/run/php/php7.4-fpm.sock|fcgi://localhost"
+    </FilesMatch>
 </Directory>
 <Directory /usr/share/phpmyadmin/setup>
     Require all denied
