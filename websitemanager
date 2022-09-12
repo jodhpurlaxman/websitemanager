@@ -228,20 +228,15 @@ websitemanager-generate-vhost() {
     cp  $CONFDIR/vhosttemplates/$TEMPLATE $APACHE_CONF
     sed -i 's#$domain#'$DOMAIN'#g' $APACHE_CONF
     sed -i 's#$username#'$username'#g' $APACHE_CONF
-    if [ "$TEMPLATE" == "laravel.conf" ]; then
-       sed -i 's#$php_version#'$PHP_VERSION'#g' $APACHE_CONF
-        mkdir -p /home/$username/public_html/sites/$DOMAIN/
-    	mkdir -p /home/$username/public_html/logs/$DOMAIN
-    	chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
-    	chown -R $username:$username /home/$username/public_html/sites/$DOMAIN
-    elif [ "$TEMPLATE" == "node.conf" ]; then
+    mkdir -p /home/$username/public_html/sites/$DOMAIN/
+    mkdir -p /home/$username/public_html/logs/$DOMAIN
+    chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
+    chown -R 777 /home/$username/public_html/logs/$DOMAIN/
+    chown -R $username:$username /home/$username/public_html/sites/$DOMAIN
+    if [ "$TEMPLATE" == "node.conf" ]; then
     sed -i 's#$port#'$PORT'#g' $APACHE_CONF
     else
-      sed -i 's#$php_version#'$PHP_VERSION'#g' $APACHE_CONF
-      mkdir -p /home/$username/public_html/sites/$DOMAIN
-      mkdir -p /home/$username/public_html/logs/$DOMAIN
-      chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
-      chown -R $username:$username /home/$username/public_html/sites/$DOMAIN
+    	sed -i 's#$php_version#'$PHP_VERSION'#g' $APACHE_CONF
     fi
 
     if [ $HAS_POOL_TEMPLATE = "1" ]; then
