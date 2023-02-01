@@ -100,12 +100,13 @@ USAGE
     echo
     echo-yellow "Example: for creating a vhost domain \"sitename.dev\" with the template \"laravel\" and php version 7.2 use below command"
     echo-green "sudo websitemanager -d sitename.dev -t default/laravel/node -f laravel/wordpress -pv 7.2  -u username #without -pv it will set php8.0 as default php version, if framework not defined it will not install it"
-    echo
-    echo-yellow "Example: for creating a vhost domain \"sitename.dev\" with the template \"node\" with proxy port 3000"
-    echo-green "sudo websitemanager -d sitename.dev -t node" #it will use default port 3000, but you can change port by -p 3001 as following command 
-    echo-green "sudo websitemanager -d sitename.dev -t node -p 3001" #it will use default port 3000, but you can change port by -p 3001
-    echo-yellow "Remove the vhost \"sitename.conf\" and remove the domain of \"/etc/hosts\""
-    #echo-green "sudo websitemanager -rm sitename.dev"
+    echo-red "Explanation of flags"
+    echo-green "-d domainname"
+    echo-green "-pv php version i.e 7.1, 7.2"
+    echo-green "-p port only applicable if -t is node "
+    echo-green "-t apache vhost template i.e default, laravel, node "
+    echo-green "-f install framework while creating vhost i.e laravel, wordpress"
+	
 
     echo -e "${NC}"
     exit 0
@@ -413,7 +414,7 @@ done
 # Verify the parameters usage
 #
 if [ "$DOMAIN" == "" ]; then
-    echo-red "You need to specify the options"
+    echo-red "You need to specify the options -d "
     websitemanager-usage;
     exit 0;
 fi
@@ -434,9 +435,11 @@ fi
 if [ "$FRAMEWORK" == "laravel" ]; then
     TEMPLATE="laravel.conf"
 fi
-
+if [ "$FRAMEWORK" == "node" ]; then
+    TEMPLATE="node.conf"
 if [ "$PORT" == "" ]; then
     PORT="3000"
+fi
 fi
 #
 # Do vhost creation process
