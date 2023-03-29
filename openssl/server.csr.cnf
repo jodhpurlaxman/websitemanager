@@ -6,9 +6,9 @@ distinguished_name = dn
 
 [dn]
 C=US
-ST=RandomState
-L=RandomCity
-O=RandomOrganization
-OU=RandomOrganizationUnit
-emailAddress=ca@qualdev.in
-#CN = qualdev.in
+ST=NY
+L=NY
+O=QD
+OU=IT
+emailAddress=serveradmin@qualdevtools.com
+CN = Qualdevtools inc
