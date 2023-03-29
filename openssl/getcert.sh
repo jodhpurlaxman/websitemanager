@@ -15,7 +15,7 @@ ROOT="$(pwd)"
 ROOT1="/etc/ssl/selfsigned"
 PASSFILE="${ROOT}/dev.password"
 PASSOPT="file:${ROOT}/dev.password"
-CAFILE="${ROOT}/ca-bundle.pem"
+CAFILE="${ROOT1}/ca-bundle.pem"
 CAKEY="${ROOT}/ca-key.pem"
 
 # Randomly create a password file, if you haven't supplied one already.
@@ -33,6 +33,7 @@ fi
 # Generate the certificate authority that we'll use as the root for all the things.
 if [ ! -f "${CAFILE}" ]; then
   echo ">> generating a certificate authority"
+  mkdir -p /etc/ssl/selfsigned/
   openssl genrsa -des3 \
     -passout ${PASSOPT} \
     -out ${CAKEY} 2048
