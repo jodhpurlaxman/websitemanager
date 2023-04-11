@@ -381,13 +381,17 @@ echo-green
 echo-green "Username: $username";
 echo-green "Domain: $DOMAIN"
 echo-green "Template: $TEMPLATE"
-echo-green "Framework: $FRAMEWORK //if framework defined it will set Template based on value of Framework"
-if [ $DOCUMENT_ROOT == '']; then
+if [ -z $FRAMEWORK  ]; then
+echo-green "Framework: NOT Defined"
+else
+echo-green "Framework: $FRAMEWORK"
+fi
+if [ -z "$DOCUMENT_ROOT"]; then
 echo-yellow "Document root: will be at /home/$username/public_html/sites/$DOMAIN"
 else
     echo-yellow "Document root: will be at $DOCUMENT_ROOT"
 fi    
-if [ $Framework == 'node']; then
+if [ $Framework == 'node' ]; then
 echo-green "Port: $PORT"  # this will work if template is node
 fi
 echo-green "Php_Version: $PHP_VERSION"
