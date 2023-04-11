@@ -229,7 +229,7 @@ websitemanager-generate-vhost() {
     APACHE_CONF="/etc/apache2/sites-available/$DOMAIN.conf"
 
     cp  $CONFDIR/vhosttemplates/$TEMPLATE $APACHE_CONF
-    sed -i 's#username#'$username'#g' $APACHE_CONF
+    sed -i 's#user#'$username'#g' $APACHE_CONF
     sed -i 's#domain#'$DOMAIN'#g' $APACHE_CONF
     if [ -z "$DOCUMENT_ROOT" ]; then
     mkdir -p /home/$username/public_html/sites/$DOMAIN/
@@ -238,7 +238,7 @@ websitemanager-generate-vhost() {
     chown -R 777 /home/$username/public_html/logs/$DOMAIN/
     chown -R $username:$username /home/$username/public_html/sites/$DOMAIN
     else
-        sed -i "s+/home/username/public_html/sites/domain+$DOCUMENT_ROOT+g" $APACHE_CONF
+        sed -i "s+/home/user/public_html/sites/domain+$DOCUMENT_ROOT+g" $APACHE_CONF
     	mkdir -p /home/$username/public_html/logs/$DOMAIN
 	chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
     fi
@@ -317,7 +317,7 @@ websitemanager-point-ip() {
 
 websitemanager-ssl-generate() {
 cd "$CONFDIR/openssl"
-./getcert.sh $DOMAIN
+./getcert.sh $DOMAIN >> /dev/null
 }
 #
 # Reloads apache server and php-fpm, if required
