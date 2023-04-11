@@ -431,10 +431,6 @@ while [ $1 ]; do
 done
 
 #
-
-echo $DOCUMENT_ROOT
-exit 1
-
 # Verify the parameters usage
 #
 if [ "$DOMAIN" == "" ]; then
