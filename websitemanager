@@ -389,9 +389,9 @@ else
 echo-green "Framework: $FRAMEWORK"
 fi
 if [ -z "$DOCUMENT_ROOT" ]; then
-echo-yellow "'/home/$username/public_html/sites/$DOMAIN'"
+echo-yellow "Document root: '/home/$username/public_html/sites/$DOMAIN'"
 else
-    echo-yellow "Document root: will be at $DOCUMENT_ROOT"
+    echo-yellow "Custom Document root: $DOCUMENT_ROOT"
 fi    
 if [ "$Framework" == 'node' ]; then
 echo-green "Port: $PORT"  # this will work if template is node
