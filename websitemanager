@@ -389,7 +389,7 @@ else
 echo-green "Framework: $FRAMEWORK"
 fi
 if [ -z "$DOCUMENT_ROOT" ]; then
-echo-yellow "Document root: will be at /home/$username/public_html/sites/$DOMAIN"
+echo-yellow "'/home/$username/public_html/sites/$DOMAIN'"
 else
     echo-yellow "Document root: will be at $DOCUMENT_ROOT"
 fi    
