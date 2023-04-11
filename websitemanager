@@ -264,7 +264,7 @@ websitemanager-generate-pool() {
     websitemanager-verify-sudo;
     echo-green "Creating PHP-FPM config for virtual host."
     cp $POOL_TEMPLATE /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
-    if [-z "$DOCUMENT_ROOT" ]; then
+    if [ -z "$DOCUMENT_ROOT" ]; then
     sed -i 's#$domain#'$DOMAIN'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
     else
     sed -i 's+/home/$username/public_html/sites/$domain+$DOCUMENT_ROOT+g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
@@ -339,12 +339,14 @@ websitemanager-enable-reload() {
 }
 
 install_framework(){
+ if [ -z "$DOCUMENT_ROOT" ]; then
  if [ -z "$(ls -A /home/$username/public_html/sites/$DOMAIN)" ]; then
     echo "verify directory is Empty"
  else
     echo-red "warning: document root directory is not empty, exiting installer"
     exit 1
- fi      
+ fi
+ fi
     
 if [ "$FRAMEWORK" == "laravel" ]; then
     echo-green "================================="
