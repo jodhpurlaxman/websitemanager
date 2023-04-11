@@ -381,12 +381,12 @@ echo-green
 echo-green "Username: $username";
 echo-green "Domain: $DOMAIN"
 echo-green "Template: $TEMPLATE"
-if [ -z $FRAMEWORK  ]; then
-echo-green "Framework: NOT Defined"
+if [ -z "$FRAMEWORK"  ]; then
+echo-green "Framework: Not Defined"
 else
 echo-green "Framework: $FRAMEWORK"
 fi
-if [ -z "$DOCUMENT_ROOT"]; then
+if [ -z "$DOCUMENT_ROOT" ]; then
 echo-yellow "Document root: will be at /home/$username/public_html/sites/$DOMAIN"
 else
     echo-yellow "Document root: will be at $DOCUMENT_ROOT"
