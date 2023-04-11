@@ -267,7 +267,7 @@ websitemanager-generate-pool() {
     if [-z "$DOCUMENT_ROOT" ]:then
     sed -i 's#$domain#'$DOMAIN'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
     else
-    sed -i 's+/home/$username/public_html/sites/$domain+$DOCUMENT_ROOT+g' $APACHE_CONF
+    sed -i 's+/home/$username/public_html/sites/$domain+$DOCUMENT_ROOT+g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
     fi
     sed -i 's#$php_version#'$PHP_VERSION'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
     sed -i 's#$USER#'$username'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
