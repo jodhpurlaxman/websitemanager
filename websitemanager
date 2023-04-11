@@ -52,7 +52,7 @@ websitemanager-credits() {
     cat <<splash
 ##############################################################################
 ##############################################################################
-# websitemanager v1.0.0 Created by LKY Rajpurohit <qualdev.laxman@gmail.com> #
+# websitemanager v1.3.0 Created by LKY Rajpurohit <qualdev.laxman@gmail.com> #
 ##############################################################################
 ##############################################################################
 
@@ -88,6 +88,7 @@ Uso: websitemanager [options] <name of vhost>
     -l          list all vhosts
     -t          set vhost template like default. laravel, nodejs
     -pv         set php version vhost
+    -dr		custom document root for pointing the domain to existing folder
     -p          sets the application's port for nodejs/proxy
     -u          set domain for the system user like you(anil, vijay, nitin)  
     -install    install the script globally
@@ -103,6 +104,7 @@ USAGE
     echo-red "Explanation of flags"
     echo-green "-d domainname"
     echo-green "-pv php version i.e 7.1, 7.2"
+    echo-green "-dr document root of domain i.e /full_path_of_existing_folder"
     echo-green "-p port only applicable if -t is node "
     echo-green "-t apache vhost template i.e default, laravel, node "
     echo-green "-f install framework while creating vhost i.e laravel, wordpress"
@@ -227,13 +229,20 @@ websitemanager-generate-vhost() {
     APACHE_CONF="/etc/apache2/sites-available/$DOMAIN.conf"
 
     cp  $CONFDIR/vhosttemplates/$TEMPLATE $APACHE_CONF
-    sed -i 's#$domain#'$DOMAIN'#g' $APACHE_CONF
     sed -i 's#$username#'$username'#g' $APACHE_CONF
+    sed -i 's#$domain#'$DOMAIN'#g' $APACHE_CONF
+    if [ -z "$DOCUMENT_ROOT" ]; then
     mkdir -p /home/$username/public_html/sites/$DOMAIN/
     mkdir -p /home/$username/public_html/logs/$DOMAIN
     chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
     chown -R 777 /home/$username/public_html/logs/$DOMAIN/
     chown -R $username:$username /home/$username/public_html/sites/$DOMAIN
+    else
+        sed -i 's+/home/$username/public_html/sites/$domain+$DOCUMENT_ROOT+g' $APACHE_CONF
+    	mkdir -p /home/$username/public_html/logs/$DOMAIN
+	chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
+    fi
+    	 
     if [ "$TEMPLATE" == "node.conf" ]; then
     sed -i 's#$port#'$PORT'#g' $APACHE_CONF
     else
@@ -255,7 +264,11 @@ websitemanager-generate-pool() {
     websitemanager-verify-sudo;
     echo-green "Creating PHP-FPM config for virtual host."
     cp $POOL_TEMPLATE /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
+    if [-z "$DOCUMENT_ROOT" ]:then
     sed -i 's#$domain#'$DOMAIN'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
+    else
+    sed -i 's+/home/$username/public_html/sites/$domain+$DOCUMENT_ROOT+g' $APACHE_CONF
+    fi
     sed -i 's#$php_version#'$PHP_VERSION'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
     sed -i 's#$USER#'$username'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
     service php$PHP_VERSION-fpm restart 
@@ -307,7 +320,7 @@ cd "$CONFDIR/openssl"
 ./getcert.sh $DOMAIN
 }
 #
-# Reloads apache server andm php5-fpm, if required
+# Reloads apache server and php-fpm, if required
 #
 websitemanager-enable-reload() {
     websitemanager-verify-sudo;
@@ -327,7 +340,7 @@ websitemanager-enable-reload() {
 
 install_framework(){
  if [ -z "$(ls -A /home/$username/public_html/sites/$DOMAIN)" ]; then
-    echo "Empty"
+    echo "verify directory is Empty"
  else
     echo-red "warning: document root directory is not empty, exiting installer"
     exit 1
@@ -335,7 +348,7 @@ install_framework(){
     
 if [ "$FRAMEWORK" == "laravel" ]; then
     echo-green "================================="
-    echo-green "downloading and installing Laravel"	
+    echo-green "downloading and installing latest Laravel version"	
  	composer create-project laravel/laravel "/home/$username/public_html/sites/$DOMAIN"
 	chown -R $username:$username "/home/$username/public_html/sites/$DOMAIN"
     temp_DB=${DOMAIN%.*}
@@ -369,8 +382,14 @@ echo-green "Username: $username";
 echo-green "Domain: $DOMAIN"
 echo-green "Template: $TEMPLATE"
 echo-green "Framework: $FRAMEWORK //if framework defined it will set Template based on value of Framework"
+if [ $DOCUMENT_ROOT == '']; then
 echo-yellow "Document root: will be at /home/$username/public_html/sites/$DOMAIN"
+else
+    echo-yellow "Document root: will be at $DOCUMENT_ROOT"
+fi    
+if [ $Framework == 'node']; then
 echo-green "Port: $PORT"  # this will work if template is node
+fi
 echo-green "Php_Version: $PHP_VERSION"
 echo-green
 echo-green "=============================================================================="
@@ -401,6 +420,7 @@ while [ $1 ]; do
             PHP_VERSION="$2"
             HAS_POOL_TEMPLATE="1"
             ;;
+	'-dr') DOCUMENT_ROOT="$2";;    
         '-p') PORT="$2";;    
         '-d') DOMAIN="$2";;
         '-u') USERNAME="$2";;
@@ -411,6 +431,10 @@ while [ $1 ]; do
 done
 
 #
+
+echo $DOCUMENT_ROOT
+exit 1
+
 # Verify the parameters usage
 #
 if [ "$DOMAIN" == "" ]; then
@@ -418,12 +442,6 @@ if [ "$DOMAIN" == "" ]; then
     websitemanager-usage;
     exit 0;
 fi
-
-#if [ "$USERNAME" != "" ]; then
-#    echo "username khali hai"
-#    websitemanager-getusername
-#fi
-
 
 if [ "$PHP_VERSION" == "" ]; then
     PHP_VERSION="8.0"
