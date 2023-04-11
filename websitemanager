@@ -229,8 +229,8 @@ websitemanager-generate-vhost() {
     APACHE_CONF="/etc/apache2/sites-available/$DOMAIN.conf"
 
     cp  $CONFDIR/vhosttemplates/$TEMPLATE $APACHE_CONF
-    sed -i 's#$username#'$username'#g' $APACHE_CONF
-    sed -i 's#$domain#'$DOMAIN'#g' $APACHE_CONF
+    sed -i 's#username#'$username'#g' $APACHE_CONF
+    sed -i 's#domain#'$DOMAIN'#g' $APACHE_CONF
     if [ -z "$DOCUMENT_ROOT" ]; then
     mkdir -p /home/$username/public_html/sites/$DOMAIN/
     mkdir -p /home/$username/public_html/logs/$DOMAIN
@@ -238,15 +238,15 @@ websitemanager-generate-vhost() {
     chown -R 777 /home/$username/public_html/logs/$DOMAIN/
     chown -R $username:$username /home/$username/public_html/sites/$DOMAIN
     else
-        sed -i 's+/home/$username/public_html/sites/$domain+$DOCUMENT_ROOT+g' $APACHE_CONF
+        sed -i "s+/home/username/public_html/sites/domain+$DOCUMENT_ROOT+g" $APACHE_CONF
     	mkdir -p /home/$username/public_html/logs/$DOMAIN
 	chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
     fi
     	 
     if [ "$TEMPLATE" == "node.conf" ]; then
-    sed -i 's#$port#'$PORT'#g' $APACHE_CONF
+    sed -i 's#port#'$PORT'#g' $APACHE_CONF
     else
-    	sed -i 's#$php_version#'$PHP_VERSION'#g' $APACHE_CONF
+    	sed -i 's#php_version#'$PHP_VERSION'#g' $APACHE_CONF
     fi
 
     if [ $HAS_POOL_TEMPLATE = "1" ]; then
@@ -265,12 +265,12 @@ websitemanager-generate-pool() {
     echo-green "Creating PHP-FPM config for virtual host."
     cp $POOL_TEMPLATE /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
     if [ -z "$DOCUMENT_ROOT" ]; then
-    sed -i 's#$domain#'$DOMAIN'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
+    sed -i 's#domain#'$DOMAIN'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
     else
-    sed -i "s+/home/$USER/public_html/sites/$domain+$DOCUMENT_ROOT+g" /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
+    sed -i "s+/home/$user/public_html/sites/$domain+$DOCUMENT_ROOT+g" /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
     fi
-    sed -i 's#$php_version#'$PHP_VERSION'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
-    sed -i 's#$USER#'$username'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
+    sed -i 's#php_version#'$PHP_VERSION'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
+    sed -i 's#user#'$username'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
     service php$PHP_VERSION-fpm restart 
 }
 
