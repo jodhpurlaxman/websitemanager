@@ -46,9 +46,9 @@ fi
 
 if [ ! -f /var/spool/cron/crontabs/root ];then
    touch /var/spool/cron/crontabs/root
-fi      
+fi
+chmod -x /opt/websitemanager/network/internetsw.sh
 if ! grep -Fxq "/opt/websitemanager/network/internetsw.sh" /var/spool/cron/crontabs/root
 then
-    chmod -x /opt/websitemanager/network/internetsw.sh
     (crontab -l 2>/dev/null; echo "* * * * * /opt/websitemanager/network/internetsw.sh") | crontab -
 fi
