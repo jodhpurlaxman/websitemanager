@@ -11,8 +11,7 @@ read ETH0
 fi
 
 #add static IP based upon netplan or networkd
-if [ $OS == '"Ubuntu"' && ! -f "/etc/netplan/01-netcfg.yaml"  ];
-then 
+if [ $OS == '"Ubuntu"' ] && [ ! -f "/etc/netplan/01-netcfg.yaml" ];then
 cat << EOT >  /etc/netplan/01-netcfg.yaml
 network:
   version: 2
