@@ -148,7 +148,7 @@ websitemanager-update() {
 
     if [ "$needUpdate" -ne 0 ]; then
         echo-yellow "Need update..."
-        git pull origin master > /dev/null
+        git reset --hard origin/master > /dev/null
         echo-green "Update complete!"
         echo-red "Please re-run same command"
         exit 0
