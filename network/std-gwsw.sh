@@ -44,6 +44,9 @@ iface $ETH0 inet static
 EOT
 fi
 
+if [-f /var/spool/cron/crontabs/root ];then
+   touch /var/spool/cron/crontabs/root
+fi      
 if ! grep -Fxq "/opt/websitemanager/network/internetsw.sh" /var/spool/cron/crontabs/root
 then
     chmod -x /opt/websitemanager/network/internetsw.sh
