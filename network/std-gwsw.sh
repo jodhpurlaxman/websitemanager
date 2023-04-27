@@ -11,7 +11,7 @@ read ETH0
 fi
 
 #add static IP based upon netplan or networkd
-if [ $OS == '"Ubuntu"' ] && [ ! -f "/etc/netplan/01-netcfg.yaml" ];then
+if [[ $OS == '"Ubuntu"' ]] && [[ ! -f '/etc/netplan/01-netcfg.yaml' ]]; then
 cat << EOT >  /etc/netplan/01-netcfg.yaml
 network:
   version: 2
@@ -27,7 +27,7 @@ network:
           addresses: [1.1.1.1, 8.8.8.8, 4.4.4.4]
 EOT
 else
-cat << EOT >  /etc/netplan/01-netcfg.yaml
+cat << EOT >  /etc/network/interfaces
 source /etc/network/interfaces.d/*
 # The loopback network interface
 auto lo
