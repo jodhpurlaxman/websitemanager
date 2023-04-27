@@ -28,7 +28,7 @@ network:
           addresses: [1.1.1.1, 8.8.8.8, 4.4.4.4]
 EOT
 else
-cat << EOT > > /etc/netplan/01-netcfg.yaml
+cat << EOT >  /etc/netplan/01-netcfg.yaml
 source /etc/network/interfaces.d/*
 # The loopback network interface
 auto lo
