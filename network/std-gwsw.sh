@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 echo "Enter the Static IP : "  
 read IP
