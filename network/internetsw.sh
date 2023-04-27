@@ -9,21 +9,19 @@ OS=$(cat /etc/os-release | sed -n '1p' | awk -F "=" '{print $2}')
 if [ "$status1" != "1received" ] then
 		if [ "$OS" == '"Ubuntu"' ];then 
 			if [ "$Current_GW" == "192.168.0.1" ]; then
-				sed -i 's/192.168.0.1/192.168.0.2/g' /etc/netplan/01-netcfg.yaml
+				sed -i 's/"192.168.0.1"/"192.168.0.2"/g' /etc/netplan/01-netcfg.yaml
 				netplan apply
 			else
-			sed -i 's/192.168.0.2/92.168.0.1/g' /etc/netplan/01-netcfg.yaml
+			sed -i 's/"192.168.0.2"/"192.168.0.1"/g' /etc/netplan/01-netcfg.yaml
 			netplan apply
 			fi
 		elif [ "$OS" != '"Ubuntu"' ]; then 
-			if [ $Current_GW == "192.168.0.1" ]; then
-				sed -i 's/192.168.0.1/192.168.0.2/g' /etc/network/interfaces
+			if [ "$Current_GW" == "192.168.0.1" ]; then
+				sed -i 's/"192.168.0.1"/"192.168.0.2"/g' /etc/network/interfaces
 				ifdown etho && ifup eth0
 			else
-			sed -i 's/192.168.0.2/92.168.0.1/g' /etc/network/interfaces
+			sed -i 's/"192.168.0.2"/"192.168.0.1"/g' /etc/network/interfaces
 			ifdown etho && ifup eth0
 			fi
-		fi	
-fi	
-
-
+		fi
+fi
