@@ -1,5 +1,5 @@
 #!/bin/bash
-
+OS=$(cat /etc/os-release | sed -n '1p' | awk -F "=" '{print $2}')
 echo "Enter the Static IP : "  
 read IP
 /sbin/ip -4 -o a | cut -d ' ' -f 2,7 | cut -d '/' -f 1 | grep enp2s0
