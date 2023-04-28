@@ -5,12 +5,9 @@ read IP
 echo "#Below are the name of your sys networkcards :"  
 /sbin/ip -4 -o a | cut -d ' ' -f 2,7 | cut -d '/' -f 1
 echo "#End of networkcards list"  
-if [ $? == 0 ]; then
-  ETH0=enp3s0
-  else
-  echo "Enter the main ethernet adaptor name : "  
+
+echo "Enter the main ethernet adaptor name : "  
 read ETH0
-fi
 
 #add static IP based upon netplan or networkd
 if [[ $OS == '"Ubuntu"' ]] && [[ ! -f '/etc/netplan/01-netcfg.yaml' ]]; then
