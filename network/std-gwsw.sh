@@ -49,7 +49,7 @@ fi
 if [ ! -f /var/spool/cron/crontabs/root ];then
    touch /var/spool/cron/crontabs/root
 fi
-if [ ! -d /opt/network/ ] && [ ! -f /opt/network/ ] ;then
+if [ ! -d /opt/network/ ] && [ ! -f /usr/bin/internetsw ] ;then
   mkdir /opt/network/
   ln -s /opt/network/internetsw.sh /usr/bin/internetsw
 fi  
