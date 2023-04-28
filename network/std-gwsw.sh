@@ -2,7 +2,9 @@
 OS=$(cat /etc/os-release | sed -n '1p' | awk -F "=" '{print $2}')
 echo "Enter the Static IP : "  
 read IP
+echo "#Below are the name of your sys networkcards :"  
 /sbin/ip -4 -o a | cut -d ' ' -f 2,7 | cut -d '/' -f 1
+echo "#End of networkcards list"  
 if [ $? == 0 ]; then
   ETH0=enp3s0
   else
