@@ -8,7 +8,7 @@ echo "#End of networkcards list"
 
 echo "Enter the main ethernet adaptor name : "  
 read ETH0
-
+rm -f /etc/netplan/01-netcfg.yaml
 #add static IP based upon netplan or networkd
 if [[ $OS == '"Ubuntu"' ]] && [[ ! -f '/etc/netplan/01-netcfg.yaml' ]]; then
 cat << EOT >  /etc/netplan/01-netcfg.yaml
