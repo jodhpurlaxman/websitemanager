@@ -6,7 +6,7 @@ Current_GW=$(ip route | grep default | awk '{print $3}')
 OS=$(cat /etc/os-release | sed -n '1p' | awk -F "=" '{print $2}')
 
 
-if [ "$status1" != "1received" ] then
+if [ "$status1" != "1received" ]; then
 		if [ "$OS" == '"Ubuntu"' ];then 
 			if [ "$Current_GW" == "192.168.0.1" ]; then
 				sed -i 's/"192.168.0.1"/"192.168.0.2"/g' /etc/netplan/01-netcfg.yaml
