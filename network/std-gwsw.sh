@@ -1,6 +1,6 @@
 #!/bin/bash
 OS=$(cat /etc/os-release | sed -n '1p' | awk -F "=" '{print $2}')
-echo "Enter the Static IP : "  
+echo "Enter the Static IP like 192.168.0.200(not_same): "  
 read IP
 echo "#Below are the name of your sys networkcards :"  
 /sbin/ip -4 -o a | cut -d ' ' -f 2,7 | cut -d '/' -f 1
