@@ -24,7 +24,7 @@ if [ "$status1" != "1received" ]; then
 				ifdown etho && ifup eth0
 			else
 				echo "Current internet is 2(Non-Ubuntu)"
-				sed -i 's/192.168.0.2/"192.168.0.1/g' /etc/network/interfaces
+				sed -i 's/192.168.0.2/192.168.0.1/g' /etc/network/interfaces
 				ifdown etho && ifup eth0
 			fi
 		fi
