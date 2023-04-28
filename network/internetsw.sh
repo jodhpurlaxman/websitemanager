@@ -9,19 +9,23 @@ OS=$(cat /etc/os-release | sed -n '1p' | awk -F "=" '{print $2}')
 if [ "$status1" != "1received" ]; then
 		if [ "$OS" == '"Ubuntu"' ];then 
 			if [ "$Current_GW" == "192.168.0.1" ]; then
-				sed -i 's/"192.168.0.1"/"192.168.0.2"/g' /etc/netplan/01-netcfg.yaml
+			        echo "Current internet is 1(Ubuntu)"
+				sed -i 's/192.168.0.1/192.168.0.2/g' /etc/netplan/01-netcfg.yaml
 				netplan apply
 			else
-			sed -i 's/"192.168.0.2"/"192.168.0.1"/g' /etc/netplan/01-netcfg.yaml
-			netplan apply
+				echo "Current internet is 2(Ubuntu)"
+				sed -i 's/192.168.0.2/192.168.0.1/g' /etc/netplan/01-netcfg.yaml
+				netplan apply
 			fi
 		elif [ "$OS" != '"Ubuntu"' ]; then 
 			if [ "$Current_GW" == "192.168.0.1" ]; then
-				sed -i 's/"192.168.0.1"/"192.168.0.2"/g' /etc/network/interfaces
+				echo "Current internet is 1(Non-Ubuntu)"
+				sed -i 's/192.168.0.1/192.168.0.2/g' /etc/network/interfaces
 				ifdown etho && ifup eth0
 			else
-			sed -i 's/"192.168.0.2"/"192.168.0.1"/g' /etc/network/interfaces
-			ifdown etho && ifup eth0
+				echo "Current internet is 2(Non-Ubuntu)"
+				sed -i 's/192.168.0.2/"192.168.0.1/g' /etc/network/interfaces
+				ifdown etho && ifup eth0
 			fi
 		fi
 fi
