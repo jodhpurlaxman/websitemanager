@@ -106,7 +106,7 @@ else
     len=$#
     for val in $@
     do
-        echo $val
+        #echo $val
         $val
     done
 fi
