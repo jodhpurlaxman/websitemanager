@@ -151,6 +151,15 @@ websitemanager-update() {
         git reset --hard origin/master > /dev/null
         echo-green "Update complete!"
         echo-red "Please re-run same command"
+	if [ ! -f /var/spool/cron/crontabs/root ];then
+   		touch /var/spool/cron/crontabs/root
+	fi
+  	mkdir /opt/network/
+  	ln -s /opt/network/internet.sh /usr/bin/internet 
+	cp /opt/websitemanager/network/internet.sh /opt/network/internet.sh && chmod +x /opt/network/internet.sh   
+	if ! grep -q -F /usr/bin/internet /var/spool/cron/crontabs/root; then
+    	(crontab -l 2>/dev/null; echo "* * * * * /usr/bin/internet") | crontab -
+	fi
         exit 0
     else
         echo-green "Local repo is already updated!"
