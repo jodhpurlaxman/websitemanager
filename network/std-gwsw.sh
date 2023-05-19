@@ -48,9 +48,9 @@ if [ ! -f /var/spool/cron/crontabs/root ];then
 fi
 if [ ! -d /opt/network/ ] && [ ! -f /usr/bin/internetsw ] ;then
   mkdir /opt/network/
-  ln -s /opt/network/internetsw.sh /usr/bin/internetsw
+  ln -s /opt/network/internetsw.sh /usr/bin/internet
 fi  
-cp /opt/websitemanager/network/internetsw.sh /opt/network/internetsw.sh && chmod +x /opt/network/internetsw.sh   
-if ! grep -q -F /usr/bin/internetsw /var/spool/cron/crontabs/root; then
-    (crontab -l 2>/dev/null; echo "* * * * * /usr/bin/internetsw") | crontab -
+cp /opt/websitemanager/network/internet.sh /opt/network/internet.sh && chmod +x /opt/network/internet.sh   
+if ! grep -q -F /usr/bin/internet /var/spool/cron/crontabs/root; then
+    (crontab -l 2>/dev/null; echo "* * * * * /usr/bin/internet") | crontab -
 fi
