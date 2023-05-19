@@ -212,7 +212,7 @@ fi
 sudoers_user() {
 websitemanager-verify-sudo;
 if ! grep -q "$(logname)" /etc/sudoers; then
-    echo "$(logname) ALL = NOPASSWD: /bin/systemctl restart apache2.service, /usr/bin/websitemanager, /usr/bin/systemmanager, /bin/kill" >> /etc/sudoers
+    echo "$(logname) ALL = NOPASSWD: /bin/systemctl restart apache2.service, /usr/bin/websitemanager, /usr/bin/systemmanager,/usr/bin/internet /bin/kill" >> /etc/sudoers
     
 else
     echo-green "user account already exists in sudoers";
