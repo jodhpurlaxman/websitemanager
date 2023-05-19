@@ -52,5 +52,5 @@ if [ ! -d /opt/network/ ] && [ ! -f /usr/bin/internet.sh ] ;then
 fi  
 cp /opt/websitemanager/network/internet.sh /opt/network/internet.sh && chmod +x /opt/network/internet.sh   
 if ! grep -q -F /usr/bin/internet /var/spool/cron/crontabs/root; then
-    (crontab -l 2>/dev/null; echo "* * * * * /usr/bin/internet") | crontab -
+    (crontab -l 2>/dev/null; echo "* * * * * /usr/bin/internet change") | crontab -
 fi
