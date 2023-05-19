@@ -46,9 +46,9 @@ fi
 if [ ! -f /var/spool/cron/crontabs/root ];then
    touch /var/spool/cron/crontabs/root
 fi
-if [ ! -d /opt/network/ ] && [ ! -f /usr/bin/internetsw ] ;then
+if [ ! -d /opt/network/ ] && [ ! -f /usr/bin/internet.sh ] ;then
   mkdir /opt/network/
-  ln -s /opt/network/internetsw.sh /usr/bin/internet
+  ln -s /opt/network/internet.sh /usr/bin/internet
 fi  
 cp /opt/websitemanager/network/internet.sh /opt/network/internet.sh && chmod +x /opt/network/internet.sh   
 if ! grep -q -F /usr/bin/internet /var/spool/cron/crontabs/root; then
