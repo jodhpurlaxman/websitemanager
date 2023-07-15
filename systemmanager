@@ -75,17 +75,19 @@ systemmanager-credits() {
 
     echo -e "${GREEN}"
     cat <<splash
-##############################################################################
-##############################################################################
-##systemmanager v1.9.0 Created by LKY Rajpurohit <qualdev.laxman@gmail.com>###
-##############################################################################
-##############################################################################
+############################################################################################################################################################
+############################################################################################################################################################
+#############################              systemmanager v2.0.0 Created by LKY Rajpurohit <qualdev.laxman@gmail.com>             ###########################
+############################################################################################################################################################
+############################################################################################################################################################
 splash
     echo -e "${NC}"
 
 }
 systemmanager-credits;
 systemmanager-install;
+echo-red
+echo-red
 echo-red "Would you like to upgrade mariadb y/n" 
 read mariadb 
 if [ $mariadb = 'y' ];then
@@ -121,24 +123,24 @@ CHOICE=$(dialog --clear \
 clear
 case $CHOICE in
         1)
-            dbv = '4';;
+            dbv = '4'
         2)
-            dbv = '5';;
+            dbv = '5'
         3)
-            dbv = '6';;
+            dbv = '6'
         4)
-            dbv = '7';;
+            dbv = '7'
         5)
-            dbv = '8';;
+            dbv = '8'
         6)
-            dbv = '9';;
+            dbv = '9'
         7)
-            dbv = '10';;
+            dbv = '10'
         8)
-            dbv = '11';;
+            dbv = '11'
 esac
 fi
-echo $dbv 
+echo-yellow "$dbv" 
 
 apt update
 commonpkg="git unzip bind9 filezilla cifs-utils resolvconf openssh-server git build-essential libtool autoconf software-properties-common curl wget gcc g++ make dirmngr apt-transport-https"
