@@ -109,7 +109,7 @@ OPTIONS=(1 "Mariadb 10.4"
          5 "Mariadb 10.8"
          6 "Mariadb 10.9"
          7 "Mariadb 10.10"
-         8 "Mariadb 10.11"
+         8 "Mariadb 10.11")
         
 
 CHOICE=$(dialog --clear \
@@ -123,21 +123,23 @@ CHOICE=$(dialog --clear \
 clear
 case $CHOICE in
         1)
-            dbv = '4'
+            dbv = '4';;
         2)
-            dbv = '5'
+            dbv = '5';;
         3)
-            dbv = '6'
+            dbv = '6';;
         4)
-            dbv = '7'
+            dbv = '7';;
         5)
-            dbv = '8'
+            dbv = '8';;
         6)
-            dbv = '9'
+            dbv = '9';;
         7)
-            dbv = '10'
+            dbv = '10';;
         8)
-            dbv = '11'
+            dbv = '11';;
+        *)  
+            echo "wrong option selected, Try Again"    
 esac
 fi
 echo-yellow "$dbv" 
