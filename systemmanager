@@ -92,8 +92,8 @@ echo-red "Would you like to upgrade mariadb y/n"
 read mariadb 
 if [ $mariadb = 'y' ];then
 echo-green "removing database package and installing mariadb"
-apt remove mysql-*
-apt remove mariadb*
+apt remove -y mysql-*
+apt remove -y mariadb*
 
 HEIGHT=15
 WIDTH=40
