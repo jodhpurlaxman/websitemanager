@@ -94,7 +94,7 @@ apt install -y $commonpkg
 add-apt-repository ppa:ondrej/apache2 -y
 add-apt-repository ppa:ondrej/php -y
 
-echo-res "Would you like to upgrade mariadb y/n" 
+echo-red "Would you like to upgrade mariadb y/n" 
 read mariadb 
 if [ $mariadb = 'y' ];then
 echo-green "removing database package and installing mariadb"
