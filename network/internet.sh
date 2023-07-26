@@ -30,11 +30,11 @@ function change(){
     status1=$(ping -c1 1.1.1.1 | grep "1 received" | awk '{print $4$5}'| sed 's/\(.*\),/\1 /')
     status2=$(ping -c1 8.8.8.8 | grep "1 received" | awk '{print $4$5}'| sed 's/\(.*\),/\1 /')
     Current_GW=$(ip route | grep default | awk '{print $3}')
-    OS=$(cat /etc/os-release | sed -n '1p' | awk -F "=" '{print $2}')
+    OS=$(cat /etc/os-release | sed -n '1p' | awk -F "=" '{print $2}' | sed 's/.$//' | sed 's/^.//')
 
 
     if [ "$status1" != "1received " ] && [  "$status2" != "1received " ]; then
-		if [ "$OS" == '"Ubuntu"' ];then 
+		[[ "$OS" =~ .*"Ubuntu".* ]];then 
 			if [ "$Current_GW" == "192.168.0.1" ]; then
 			        echo "Current internet is 1(Ubuntu), switching to 2"
 				sed -i 's/\<192.168.0.1\>/192.168.0.2/g' /etc/netplan/01-netcfg.yaml
@@ -66,7 +66,7 @@ function change(){
     echo "########################################################################"
     read -t 5 -n 1 answer
     if [ $answer == y ] || [ $answer == Y ]; then
-        	if [ "$OS" == '"Ubuntu"' ];then 
+        	[[ "$OS" =~ .*"Ubuntu".* ]];then 
 			if [ "$Current_GW" == "192.168.0.1" ]; then
 			        echo "Current internet is 1(Ubuntu), switching to 2"
 				sed -i 's/\<192.168.0.1\>/192.168.0.2/g' /etc/netplan/01-netcfg.yaml
