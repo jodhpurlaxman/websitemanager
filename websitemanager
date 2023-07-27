@@ -154,8 +154,10 @@ websitemanager-update() {
 	if [ ! -f /var/spool/cron/crontabs/root ];then
    		touch /var/spool/cron/crontabs/root
 	fi
-  	mkdir /opt/network/
-  	ln -s /opt/network/internet.sh /usr/bin/internet 
+  	if [ ! -d "/opt/network" ]; then
+		mkdir /opt/network/
+		ln -s /opt/network/internet.sh /usr/bin/internet
+        fi 
 	cp /opt/websitemanager/network/internet.sh /opt/network/internet.sh && chmod +x /opt/network/internet.sh   
 	if ! grep -q -F /usr/bin/internet /var/spool/cron/crontabs/root; then
     	(crontab -l 2>/dev/null; echo "* * * * * /usr/bin/internet chnage") | crontab -
