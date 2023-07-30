@@ -144,6 +144,12 @@ case $CHOICE in
 esac
 else 
       dbv="6"
+echo-red "Please enter mysql username"
+read mysqluser
+echo-red "Please enter mysql password"
+read mysqlusepasswd
+#save mysql credentials in file for further uses
+
 fi
 
 apt update
