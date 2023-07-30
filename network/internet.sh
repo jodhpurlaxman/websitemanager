@@ -66,7 +66,7 @@ function change(){
     echo "########################################################################"
     read -t 5 -n 1 answer
     if [ $answer == y ] || [ $answer == Y ]; then
-        	[[ "$OS" =~ .*"Ubuntu".* ]];then 
+        	if [[ "$OS" =~ .*"Ubuntu".* ]];then 
 			if [ "$Current_GW" == "192.168.0.1" ]; then
 			        echo "Current internet is 1(Ubuntu), switching to 2"
 				sed -i 's/\<192.168.0.1\>/192.168.0.2/g' /etc/netplan/01-netcfg.yaml
