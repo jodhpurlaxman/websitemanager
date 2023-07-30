@@ -86,11 +86,12 @@ splash
 }
 systemmanager-credits;
 systemmanager-install;
+sudo apt-get install dialog
 echo-red
 echo-red
 echo-red "Would you like to upgrade mariadb y/n" 
 read mariadb 
-if [ $mariadb = 'y' ];then
+if [ "$mariadb" = "y" ];then
 echo-green "removing database package and installing mariadb"
 apt remove -y mysql-*
 apt remove -y mariadb*
@@ -141,6 +142,8 @@ case $CHOICE in
         *)  
             echo "wrong option selected, Try Again"    
 esac
+else 
+      dbv="6"
 fi
 
 apt update
@@ -165,7 +168,7 @@ cat << EOT >  /etc/apache2/conf-available/php-fpm.conf
         </Directory>
 </IfModule>
 EOT
-a2enmod "proxy proxy_fcgi setenvif actions alias auth_basic env expires headers http2 mime ssl rewrite request mpm_itk"
+a2enmod "proxy proxy_http proxy_fcgi setenvif actions alias auth_basic env expires headers http2 mime ssl rewrite request mpm_itk"
 a2enconf  "php-fpm php7.0-fpm php7.1-fpm  php7.2-fpm php7.3-fpm php7.4-fpm php8.0-fpm php8.1-fpm php8.2-fpm"
 
 for i in 7.0 7.1 7.2 7.3 7.4 8.0 8.1 8.2
