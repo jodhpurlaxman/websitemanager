@@ -72,7 +72,7 @@ cp ${CAFILE} /etc/ssl/selfsigned/
 cp  ${ROOT1}/${NAME}.crt  /etc/ssl/selfsigned/
 cp ${ROOT1}/${NAME}.key /etc/ssl/selfsigned/
 
-rm -rf ${ROOT}/${NAME}-key.pem ${ROOT1}/${NAME}.crt $ROOT/v3-${NAME}.ext  $ROOT/openssl-${NAME}.cnf $ROOT/${NAME}.csr
+rm -rf ${ROOT}/${NAME}-key.pem ${ROOT1}/${NAME}.crt ${ROOT1}/${NAME}.key  $ROOT/v3-${NAME}.ext  $ROOT/openssl-${NAME}.cnf $ROOT/${NAME}.csr
 }
 if [ -z "$1" ]; then
   echo "${USAGE}"
