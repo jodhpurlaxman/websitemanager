@@ -1,21 +1,17 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 #
 # Generate a set of TLS credentials that can be used to run development mode.
-#
-# Based on script by Ash Wilson (@smashwilson)
-# https://github.com/cloudpipe/cloudpipe/pull/45/files#diff-15
-#
+# Author Laxman singh jodhpur.laxman@gmail.com
 # usage: sh ./genkeys.sh NAME HOSTNAME IP
 
 set -o errexit
 
-#USAGE="usage: sh ./genkeys.sh NAME HOSTNAME IP"
+USAGE="usage: sudo ./genkeys.sh NAME HOSTNAME IP"
 ROOT="$(pwd)"
-#$ROOT="/mnt/raid1/backup/script/openssl"
-ROOT1="/etc/ssl/selfsigned"
+ROOT1=${ROOT}
 PASSFILE="${ROOT}/dev.password"
 PASSOPT="file:${ROOT}/dev.password"
-CAFILE="${ROOT1}/ca-bundle.pem"
+CAFILE="${ROOT}/ca-bundle.pem"
 CAKEY="${ROOT}/ca-key.pem"
 
 # Randomly create a password file, if you haven't supplied one already.
@@ -37,13 +33,13 @@ if [ ! -f "${CAFILE}" ]; then
   openssl genrsa -des3 \
     -passout ${PASSOPT} \
     -out ${CAKEY} 2048
-  openssl req -new -x509 -days 1825 \
+  openssl req -new -x509 -days 3650 \
     -batch \
     -passin ${PASSOPT} \
     -key ${CAKEY} \
     -passout ${PASSOPT} \
-    -out ${CAFILE}
-  echo "<< certificate authority generated."
+    -out ${CAFILE} \
+    -subj "/C=US/ST=NewYork/L=New York co/O=Qualdev Inc./CN=Qualdev Inc."
 fi
 keypair() {
   local NAME=$1
@@ -57,24 +53,31 @@ keypair() {
   fi
 
   echo ">> generating a keypair for: ${NAME}"
-
-  echo ".. key"
-#   openssl genrsa -des3 \
-#    -passout ${PASSOPT} \
-#    -out ${ROOT}/${NAME}-key.pem 2048
+  echo ""
+  echo ""
+   openssl genrsa -des3 \
+    -passout ${PASSOPT} \
+    -out ${ROOT}/${NAME}-key.pem 2048  > /dev/null 2>&1
+   
 cp ${ROOT}/server.csr.cnf ${ROOT}/openssl-${NAME}.cnf
 echo "CN = ${NAME}" >> ${ROOT}/openssl-${NAME}.cnf
 cp ${ROOT}/v3.ext  ${ROOT}/v3-${NAME}.ext
 echo "DNS.1 = ${NAME}" >> ${ROOT}/v3-${NAME}.ext
 echo "DNS.2 = www.${NAME}" >> ${ROOT}/v3-${NAME}.ext
 
-openssl req -new -sha256 -nodes -out $ROOT/${NAME}.csr -newkey rsa:2048 -keyout ${ROOT1}/${NAME}.key -config <(cat $ROOT/openssl-${NAME}.cnf )
-openssl x509 -req -in $ROOT/${NAME}.csr -CA ${CAFILE} -CAkey ${CAKEY} -passin ${PASSOPT} -CAcreateserial -out ${ROOT1}/${NAME}.crt -days 500  -sha256 -extfile $ROOT/v3-${NAME}.ext
-rm -rf $ROOT/v3-${NAME}.ext  $ROOT/openssl-${NAME}.cnf $ROOT/${NAME}.csr
+
+openssl req -new -sha256 -nodes -out $ROOT/${NAME}.csr -newkey rsa:2048 -keyout ${ROOT1}/${NAME}.key -config <(cat $ROOT/openssl-${NAME}.cnf ) > /dev/null 2>&1
+openssl x509 -req -in $ROOT/${NAME}.csr -CA ${CAFILE} -CAkey ${CAKEY} -passin ${PASSOPT} -CAcreateserial -out ${ROOT1}/${NAME}.crt -days 500  -sha256 -extfile $ROOT/v3-${NAME}.ext > /dev/null 2>&1
+cp ${CAFILE} /etc/ssl/selfsigned/
+cp  ${ROOT1}/${NAME}.crt  /etc/ssl/selfsigned/
+cp ${ROOT1}/${NAME}.key /etc/ssl/selfsigned/
+
+rm -rf ${ROOT}/${NAME}-key.pem ${ROOT1}/${NAME}.crt $ROOT/v3-${NAME}.ext  $ROOT/openssl-${NAME}.cnf $ROOT/${NAME}.csr
 }
 if [ -z "$1" ]; then
   echo "${USAGE}"
   exit 1
 fi
 keypair "$1"
-# "$2" "$3"
+
+  
