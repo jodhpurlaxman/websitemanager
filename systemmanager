@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # ---------------------------------------------------------------------------- #
 # GLOBAL VARIABLES (in script)                                                 #
@@ -13,7 +13,19 @@ YELLOW='\033[0;33m'
 # No Color
 NC='\033[0m'
 CONFDIR="/opt/websitemanager"
-
+mysqlcred="/opt/websitemanager/mysql"
+commonpkg="git unzip filezilla cifs-utils resolvconf openssh-server git build-essential libtool autoconf software-properties-common curl wget gcc g++ make dirmngr apt-transport-https"
+databasepkg="mariadb-client mariadb-server"
+apache="apache2 apache2-utils libapache2-mpm-itk openssl"
+php70="php7.0-fpm php7.0-curl php7.0-common php7.0-bcmath php7.0-bz2 php7.0-intl php7.0-gd php7.0-mbstring php7.0-mysql php7.0-zip php7.0-json"
+php71="php7.1-fpm php7.1-curl php7.1-common php7.1-bcmath php7.1-bz2 php7.1-intl php7.1-gd php7.1-mbstring php7.1-mysql php7.1-zip php7.1-json"
+php72="php7.2-fpm php7.2-curl php7.2-common php7.2-bcmath php7.2-bz2 php7.2-intl php7.2-gd php7.2-mbstring php7.2-mysql php7.2-zip php7.2-json"
+php73="php7.3-fpm php7.3-curl php7.3-common php7.3-bcmath php7.3-bz2 php7.3-intl php7.3-gd php7.3-mbstring php7.3-mysql php7.3-zip php7.3-json"
+php74="php7.4-fpm php7.4-curl php7.4-common php7.4-bcmath php7.4-bz2 php7.4-intl php7.4-gd php7.4-mbstring php7.4-mysql php7.4-zip php7.4-json"
+php80="php8.0-fpm php8.0-curl php8.0-common php8.0-bcmath php8.0-bz2 php8.0-intl php8.0-gd php8.0-mbstring php8.0-mysql php8.0-zip php8.0-json"
+php81="php8.1-fpm php8.1-curl php8.1-common php8.1-bcmath php8.1-bz2 php8.1-intl php8.1-gd php8.1-mbstring php8.1-mysql php8.1-zip php8.1-json"
+php82="php8.2-fpm php8.2-curl php8.2-common php8.2-bcmath php8.2-bz2 php8.2-intl php8.2-gd php8.2-mbstring php8.2-mysql php8.2-zip php8.2-json"
+php83="php8.3-fpm php8.3-curl php8.3-common php8.3-bcmath php8.3-bz2 php8.3-intl php8.3-gd php8.3-mbstring php8.3-mysql php8.3-zip php8.3-json"
 # ---------------------------------------------------------------------------- #
 # FUNCTIONS                                                                    #
 # ---------------------------------------------------------------------------- #
@@ -68,42 +80,107 @@ systemmanager-install() {
     ln -s -f $CONFDIR/systemmanager /usr/bin/systemmanager
     echo-green "Script installed! use: systemmanager and websitemanager"
 }
-#
-# Shows info on the authors and the program
-#
-systemmanager-credits() {
 
-    echo -e "${GREEN}"
-    cat <<splash
-############################################################################################################################################################
-############################################################################################################################################################
-#############################              systemmanager v2.0.0 Created by LKY Rajpurohit <qualdev.laxman@gmail.com>             ###########################
-############################################################################################################################################################
-############################################################################################################################################################
-splash
-    echo -e "${NC}"
+function rmdb(){
+
+	apt remove -y mysql-*
+	apt remove -y mariadb*
+}
+
+
+function mysqlcred(){
+	if [ ! -f ${mysqlpwd} ]; then
+		echo-red "Please enter mysql username"
+	    	read mysqluser
+		echo-red "Please enter mysql password"
+		read mysqluserpasswd
+#save mysql credentials in file for further uses
+		echo -e "${mysqluser}\n${mysqluserpasswd}" > ${mysqlcred}
+	else
+	    mysqluser=$(head -n 1 ${mysqlcred})
+	    mysqluserpasswd=$(tail -n 1 ${mysqlcred})  
+fi
+}
+
+
+function installpkgselect(){
+    #!/bin/bash
+onoff=off
+cmd=(dialog --output-fd 1 --separate-output --extra-button --extra-label "Select All" --cancel-label "Select None" --checklist "Select Packages:" 0 0 0)
+load-dialog () {
+    options=(
+                1 "Essentials" on
+                2 "Database" $onoff
+                3 "Apache" $onoff
+                4 "Php7.0" $onoff
+                5 "Php7.1" $onoff
+                6 "Php7.2" $onoff
+                7 "Php7.3" $onoff
+                8 "Php7.4" $onoff
+                9 "Php8.0" $onoff
+                10 "Php8.1" $onoff
+                11 "Php8.2" $onoff
+                12 "Php8.3" $onoff
+    )
+    choices=$("${cmd[@]}" "${options[@]}")
+}
+load-dialog
+exit_code="$?"
+while [[ $exit_code -ne 0 ]]; do
+case $exit_code in
+    1) clear; onoff=off; load-dialog;;
+    3) clear; onoff=on; load-dialog;;
+esac
+exit_code="$?"
+done
+clear
+for choice in $choices
+do
+    case $choice in
+        1) Essentials="$commonpkg";;
+        2) mariadb="$databasepkg";;
+        3) apache2="$apache";; 
+        4) php70fpm="$php70";;
+        5) php71fpm="$php71";; 
+        6) php72fpm="$php72";; 
+        7) php73fpm="$php73";; 
+        8) php74fpm="$php74";; 
+        9) php80fpm="$php80";; 
+        10) php81fpm="$php81";; 
+        11) php82fpm="$php82";; 
+        12) php83fpm="$php83";; 
+    esac
+done
+}
+
+function installpackages(){
+    apt update -y
+    apt install -y "$Essentials" \
+        "$mariadb" \
+        "$apache2" \
+        "$php70fpm" \
+        "$php71fpm" \
+        "$php72fpm" \
+        "$php73fpm" \
+        "$php74fpm" \
+        "$php80fpm" \
+        "$php81fpm" \
+        "$php82fpm" \
+        "$php83fpm" \
 
 }
-systemmanager-credits;
-systemmanager-install;
-sudo apt-get install dialog
-echo-red
-echo-red
-echo-red "Would you like to upgrade mariadb y/n" 
-read mariadb 
-if [ "$mariadb" = "y" ];then
-echo-green "removing database package and installing mariadb"
-apt remove -y mysql-*
-apt remove -y mariadb*
 
-HEIGHT=15
-WIDTH=40
-CHOICE_HEIGHT=4
-BACKTITLE="Mariadb"
-TITLE="Select version"
-MENU="Choose one of the following options:"
 
-OPTIONS=(1 "Mariadb 10.4"
+function mariadbselect(){	
+	
+	HEIGHT=15
+	WIDTH=40
+	CHOICE_HEIGHT=4
+	BACKTITLE="Mariadb"
+	TITLE="Select version"
+	MENU="Choose one of the following options:"
+
+	OPTIONS=(1 "Mariadb 10.4"
          2 "Mariadb 10.5"
          3 "Mariadb 10.6"
          4 "Mariadb 10.7"
@@ -113,7 +190,7 @@ OPTIONS=(1 "Mariadb 10.4"
          8 "Mariadb 10.11")
         
 
-CHOICE=$(dialog --clear \
+	CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
                 --title "$TITLE" \
                 --menu "$MENU" \
@@ -121,51 +198,74 @@ CHOICE=$(dialog --clear \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
 
-clear
-case $CHOICE in
-        1)
-            dbv = '4';;
-        2)
-            dbv = '5';;
-        3)
-            dbv = '6';;
-        4)
-            dbv = '7';;
-        5)
-            dbv = '8';;
-        6)
-            dbv = '9';;
-        7)
-            dbv = '10';;
-        8)
-            dbv = '11';;
-        *)  
-            echo "wrong option selected, Try Again"    
-esac
-else 
-      dbv="6"
-echo-red "Please enter mysql username"
-read mysqluser
-echo-red "Please enter mysql password"
-read mysqlusepasswd
-#save mysql credentials in file for further uses
+	clear
+	case $CHOICE in
+	        1)
+	            dbv='4';;
+	        2)
+	            dbv='5';;
+	        3)
+	            dbv='6';;
+	        4)
+	            dbv='7';;
+	        5)
+	            dbv='8';;
+	        6)
+	            dbv='9';;
+	        7)
+	            dbv='10';;
+	        8)
+	            dbv='11';;
+	        *)  
+	            echo "wrong option selected, Try Again"
+	            mariadb
+	esac
+}
 
-fi
 
-apt update
-commonpkg="git unzip bind9 filezilla cifs-utils resolvconf openssh-server git build-essential libtool autoconf software-properties-common curl wget gcc g++ make dirmngr apt-transport-https"
+function mariaupdate(){
+	if [ -d /var/lib/mysql ]; then
+	    echo-red "Would you like to upgrade mariadb y/n" 
+	    read mariadb 
+        if [ "$mariadb" = "y" ];then
+            mariadbselect
+	    fi
+    else
+        mariadbselect    
+    fi
+}
+function apacherepo(){
+    if [[ ! -z $Apache ]]; then
+        add-apt-repository ppa:ondrej/apache2 -y
+        add-apt-repository ppa:ondrej/php -y
+    fi
+}
+mariarepo(){
+    if [[ -z $dbv ]]; then
+        curl -LsS https://r.mariadb.com/downloads/mariadb_repo_setup | sudo bash -s -- --mariadb-server-version="mariadb-10.$dbv"
+    else
+    $dbv="6"
+    curl -LsS https://r.mariadb.com/downloads/mariadb_repo_setup | sudo bash -s -- --mariadb-server-version="mariadb-10.$dbv"
+    fi
+}
+function apacheconfig(){
+    if [[ ! -z $Apache ]]; then
+        sed -i '/#<Directory/i \
+        <Directory /home/*/public_html/> \
+        Options Indexes FollowSymLinks \
+        AllowOverride ALL \
+        Require all granted \
+        </Directory>' /etc/apache2/apache2.conf
+    a2enmod "proxy proxy_http proxy_fcgi setenvif actions alias auth_basic env expires headers http2 mime ssl rewrite request mpm_itk"
+    a2enconf  "php-fpm php7.0-fpm php7.1-fpm  php7.2-fpm php7.3-fpm php7.4-fpm php8.0-fpm php8.1-fpm php8.2-fpm phpmyadmin"
+    fi
+}
 
-apt install -y $commonpkg
-add-apt-repository ppa:ondrej/apache2 -y
-add-apt-repository ppa:ondrej/php -y
-curl -LsS https://r.mariadb.com/downloads/mariadb_repo_setup | sudo bash -s -- --mariadb-server-version="mariadb-10.$dbv"
-databasepkg="mariadb-client mariadb-server"
-
-apt install -y $databasepkg apache2 apache2-utils libapache2-mpm-itk openssl php7.0-fpm  php7.0-{curl,common,xml,bcmath,bz2,intl,gd,mbstring,mysql,zip,json} php7.1-fpm php7.1-{curl,common,xml,bcmath,bz2,intl,gd,mbstring,mysql,zip,json} php7.2 php7.2-fpm php7.2-{curl,common,xml,bcmath,bz2,intl,gd,mbstring,mysql,zip,json} php7.3-fpm php7.3-{curl,common,xml,bcmath,bz2,intl,gd,mbstring,mysql,zip,json} php7.4-fpm php7.4-{curl,common,xml,bcmath,bz2,intl,gd,mbstring,mysql,zip,json} php8.0-fpm php8.0-{curl,common,xml,bcmath,bz2,intl,gd,mbstring,mysql,zip} php8.2-fpm php8.2-{curl,common,xml,bcmath,bz2,intl,gd,mbstring,mysql,zip} 
+function phpconfig(){
 touch /etc/apache2/conf-available/php-fpm.conf
 cat << EOT >  /etc/apache2/conf-available/php-fpm.conf
 <IfModule mod_fastcgi.c>
-        AddHandler php7-fcgi .phpphp8.1-fpm php8.1-{curl,common,xml,bcmath,bz2,intl,gd,mbstring,mysql,zip}
+        AddHandler php7-fcgi .php
         Action php7-fcgi /php7-fcgi
         Alias /php7-fcgi /usr/lib/cgi-bin/php7-fcgi
         FastCgiExternalServer /usr/lib/cgi-bin/php7-fcgi -socket /run/php/php8.0-fpm.sock -pass-header Authorization -idle-timeout 600
@@ -174,37 +274,11 @@ cat << EOT >  /etc/apache2/conf-available/php-fpm.conf
         </Directory>
 </IfModule>
 EOT
-a2enmod "proxy proxy_http proxy_fcgi setenvif actions alias auth_basic env expires headers http2 mime ssl rewrite request mpm_itk"
-a2enconf  "php-fpm php7.0-fpm php7.1-fpm  php7.2-fpm php7.3-fpm php7.4-fpm php8.0-fpm php8.1-fpm php8.2-fpm"
-
-for i in 7.0 7.1 7.2 7.3 7.4 8.0 8.1 8.2
-do
-cp $CONFDIR/phpini-templates/php$i.conf /etc/php/$i/fpm/php.ini
-rm -f /etc/php/$i/fpm/pool.d/www.conf
-done
-
-sed -i '/#<Directory/i \
-<Directory /home/*/public_html/> \
-Options Indexes FollowSymLinks \
-AllowOverride ALL \
-Require all granted \
-</Directory>' /etc/apache2/apache2.conf
-
-curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar > /dev/null 2>&1
-chmod +x wp-cli.phar
-mv wp-cli.phar '/usr/local/bin/wp'
-mkdir -p /etc/ssl/selfsigned
-cp "$CONFDIR/openssl/ca-bundle.pem" "/etc/ssl/selfsigned/ca-bundle.pem"
-chmod +x "$CONFDIR/openssl/getcert.sh"
-##############################################################################################################################################
-echo-green "setup phpmyadmin ..."
-rm -rf /usr/share/phpmyadmin
-mkdir -p /usr/share/phpmyadmin
-wget https://files.phpmyadmin.net/phpMyAdmin/5.2.0/phpMyAdmin-5.2.0-all-languages.zip -O /usr/share/phpmyadmin/phpmyadmin5.2.0.zip
-
-cd /usr/share/phpmyadmin/ && unzip -qq phpmyadmin5.2.0.zip&& mv phpMyAdmin-5.2.0-all-languages/* .
-cp /usr/share/phpmyadmin/config.sample.inc.php /usr/share/phpmyadmin/config.inc.php
-cp $CONFDIR/phpini-templates/default-php-fpm.conf /etc/php/8.0/fpm/pool.d/default-php-fpm.conf
+for i in 7.0 7.1 7.2 7.3 7.4 8.0 8.1 8.2 8.3
+    do
+        cp $CONFDIR/phpini-templates/php$i.conf /etc/php/$i/fpm/php.ini
+        rm -f /etc/php/$i/fpm/pool.d/www.conf
+    done
 
 touch /etc/apache2/conf-available/phpmyadmin.conf
 cat << EOT > /etc/apache2/conf-available/phpmyadmin.conf
@@ -226,49 +300,130 @@ Alias /phpmyadmin /usr/share/phpmyadmin
     Require all denied
 </Directory>
 EOT
-a2enconf phpmyadmin
-#################################################################################################################################################
-echo-green "adding mysql user for mysql/mariadb"
-mysql -e "GRANT ALL PRIVILEGES ON *.* TO 'qualdev'@'localhost' IDENTIFIED BY 'P@q2w3efg';"
-mysql -e "FLUSH PRIVILEGES;"
-
-echo-green "Change default php version 8.0 for cli"
-update-alternatives --set php /usr/bin/php8.0
-#==================================================================================================================================================
-echo-green "Removing composer v1 and installing v2 "
-rm -rf /usr/local/bin/composer && rm -rf /usr/bin/composer
-php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-php -r "if (hash_file('sha384', 'composer-setup.php') === 'e21205b207c3ff031906575712edab6f13eb0b361f2085f1f1237b7126d785e826a450292b6cfd1d64d92e6563bbde02') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-php composer-setup.php
-php -r "unlink('composer-setup.php');"
-sudo mv composer.phar /usr/bin/composer
-#==================================================================================================================================================
-echo-green "setup dns server"
-systemctl disable systemd-resolved.service
-systemctl stop systemd-resolved.service
-unlink /etc/resolv.conf
-touch  /etc/resolv.conf
-echo "nameserver 192.168.0.5" > /etc/resolv.conf
-echo "nameserver 1.1.1.1" >> /etc/resolv.conf
-#==================================================================================================================================================
-echo-green "restarting all services and enable for startup"  
-service service php7.0-fpm restart && service php7.1-fpm restart && service php7.2-fpm restart && service php7.3-fpm restart && service php7.4-fpm restart && service php8.0-fpm restart && service php8.1-fpm restart && service php8.2-fpm restart && service apache2 restart
-systemctl enable apache2 && systemctl enable php7.0-fpm &&  systemctl enable php7.1-fpm &&  systemctl enable php7.2-fpm && systemctl enable php7.3-fpm && systemctl enable php7.3-fpm && systemctl enable php7.3-fpm && systemctl enable php7.4-fpm && systemctl enable php8.0-fpm && systemctl enable php8.1-fpm && systemctl enable php8.2-fpm
-
-echo -e "${GREEN}"
-    cat <<splash
-############################ Run following command manually without sudo for installing npm, node by nvm(node manager) ###########################
-##################################################################################################################################################
-##################################################################################################################################################
-                        # curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash > /dev/null 2>&1
-                        # nvm install 16
-                        # nvm install 14
-##################################################################################################################################################
-##################################################################################################################################################
-splash
-    echo -e "${NC}"
-
 }
+
+function updatewpcli(){
+    if [ ! -f "/usr/local/bin/wp" ]; then
+    rm -f /usr/local/bin/wp
+    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar > /dev/null 2>&1
+    chmod +x wp-cli.phar
+    mv wp-cli.phar '/usr/local/bin/wp'
+    fi    
+}
+function ssl(){
+    if [ ! -d "/etc/ssl/selfsigned" ]; then
+        mkdir -p /etc/ssl/selfsigned
+        chmod +x "$CONFDIR/openssl/getcert.sh"
+    fi    
+}
+function phpmyadmin(){
+    if [ ! -d "/usr/share/phpmyadmin" ]; then
+    mkdir -p /usr/share/phpmyadmin
+    wget https://files.phpmyadmin.net/phpMyAdmin/5.2.0/phpMyAdmin-5.2.0-all-languages.zip -O /usr/share/phpmyadmin/phpmyadmin5.2.0.zip
+
+    cd /usr/share/phpmyadmin/ && unzip -qq phpmyadmin5.2.0.zip && mv phpMyAdmin-5.2.0-all-languages/* .
+    rm -rf /usr/share/phpmyadmin/phpmyadmin5.2.0.zip phpMyAdmin-5.2.0-all-languages
+    cp /usr/share/phpmyadmin/config.sample.inc.php /usr/share/phpmyadmin/config.inc.php
+    cp $CONFDIR/phpini-templates/default-php-fpm.conf /etc/php/8.0/fpm/pool.d/default-php-fpm.conf
+    fi
+}
+
+function reqpackages(){
+    sudo apt-get install dialog -y
+}
+
+function composer(){
+    rm -rf /usr/local/bin/composer && rm -rf /usr/bin/composer
+    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    php -r "if (hash_file('sha384', 'composer-setup.php') === 'e21205b207c3ff031906575712edab6f13eb0b361f2085f1f1237b7126d785e826a450292b6cfd1d64d92e6563bbde02') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+    php composer-setup.php
+    php -r "unlink('composer-setup.php');"
+    sudo mv composer.phar /usr/bin/composer
+}
+function dnssetup(){
+    systemctl disable systemd-resolved.service
+    systemctl stop systemd-resolved.service
+    unlink /etc/resolv.conf
+    touch  /etc/resolv.conf
+    echo "nameserver 192.168.0.3" > /etc/resolv.conf
+    echo "nameserver 1.1.1.1" >> /etc/resolv.conf
+}
+function mysqluser(){
+    mysql -e "GRANT ALL PRIVILEGES ON *.* TO '$mysqluser'@'localhost' IDENTIFIED BY '$mysqluserpasswd';"
+    mysql -e "FLUSH PRIVILEGES;"
+}
+
+
+
+
+#update-alternatives --set php /usr/bin/php8.0
+
+
+function servicesrestart(){
+serviceslist=(
+        mariadb
+        apache2
+        php70fpm
+        php71fpm
+        php72fpm
+        php73fpm
+        php74fpm
+        php80fpm
+        php81fpm
+        php82fpm
+        php83fpm
+    )
+
+for service in "${serviceslist[@]}"
+do
+  if ! [[ -z ${!service+x} ]]; then
+   sn=$(echo ${service} | echo "$service" | sed 's/[7-8]\B/&./g')
+   service=$( echo ${sn} |sed 's/fpm/-fpm/g')
+   systemctl enable  $service
+   systemctl start $service
+            
+  fi
+done
+}
+
+
+
+
+
+
+
+#execute functions
+reqpackages
+installpkgselect
+mariaupdate
+mysqlcred
+apacherepo
+mariarepo
+installpackages
+apacheconfig
+phpmyadmin
+phpconfig
+
+#all functions
+
+#rmdb
+#mysqlcred
+#installpkgselect
+#installpackages
+#mariadbselect
+#mariaupdate
+#apacherepo
+#mariarepo
+#apacheconfig
+#phpconfig
+#updatewpcli
+#ssl
+#phpmyadmin
+#reqpackages
+#composer
+#dnssetup
+#mysqluser
+#servicesrestart
 
 
 
