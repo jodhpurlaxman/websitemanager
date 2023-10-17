@@ -123,6 +123,10 @@ load-dialog () {
                 10 "Php8.1" $onoff
                 11 "Php8.2" $onoff
                 12 "Php8.3" $onoff
+                13 "Vscode" on
+                14 "Google Chrome" on
+
+
     )
     choices=$("${cmd[@]}" "${options[@]}")
 }
@@ -150,7 +154,8 @@ do
         9) php80fpm="$php80";; 
         10) php81fpm="$php81";; 
         11) php82fpm="$php82";; 
-        12) php83fpm="$php83";; 
+        12) php83fpm="$php83";;
+        13) vscode=on  
     esac
 done
 }
@@ -375,14 +380,16 @@ do
    sn=$(echo ${service} | echo "$service" | sed 's/[7-8]\B/&./g')
    service=$( echo ${sn} |sed 's/fpm/-fpm/g')
    cp $CONFDIR/phpini-templates/php$i.conf /etc/php/$i/fpm/php.ini
-   systemctl enable  $service
-   systemctl start $service
+   systemctl enable  $service > /dev/null 2>&1
+   systemctl start $service > /dev/null 2>&1
             
   fi
 done
 }
-function sshd(){
-echo "not implemented yet"
+function otherservices(){
+     systemctl enable ssh  > /dev/null 2>&1
+     systemctl start  ssh > /dev/null 2>&1
+
 }
 function installpackages(){
     sudo apt update -y  > /dev/null 2>&1
@@ -391,7 +398,10 @@ function installpackages(){
   sudo apt install -y $i  > /dev/null 2>&1
 done
     
-
+}
+function chrome-browser(){
+  wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  apt install -y -f ./google-chrome-stable_current_amd64.deb > /dev/null 2>&1
 }
 
 
@@ -430,3 +440,5 @@ echo-green "Executing Func. mysqlcred"
 mysqlcred
 echo-green "Executing Func. mysqluser"
 mysqluser
+echo-green "Executing Func. chrome-browser"
+chrome-browser
