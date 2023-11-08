@@ -23,10 +23,10 @@ php71="php7.1-fpm php7.1-curl php7.1-common php7.1-bcmath php7.1-bz2 php7.1-intl
 php72="php7.2-fpm php7.2-curl php7.2-common php7.2-bcmath php7.2-bz2 php7.2-intl php7.2-gd php7.2-mbstring php7.2-mysql php7.2-zip php7.2-json"
 php73="php7.3-fpm php7.3-curl php7.3-common php7.3-bcmath php7.3-bz2 php7.3-intl php7.3-gd php7.3-mbstring php7.3-mysql php7.3-zip php7.3-json"
 php74="php7.4-fpm php7.4-curl php7.4-common php7.4-bcmath php7.4-bz2 php7.4-intl php7.4-gd php7.4-mbstring php7.4-mysql php7.4-zip php7.4-json"
-php80="php8.0-fpm php8.0-curl php8.0-common php8.0-bcmath php8.0-bz2 php8.0-intl php8.0-gd php8.0-mbstring php8.0-mysql php8.0-zip"
-php81="php8.1-fpm php8.1-curl php8.1-common php8.1-bcmath php8.1-bz2 php8.1-intl php8.1-gd php8.1-mbstring php8.1-mysql php8.1-zip"
-php82="php8.2-fpm php8.2-curl php8.2-common php8.2-bcmath php8.2-bz2 php8.2-intl php8.2-gd php8.2-mbstring php8.2-mysql php8.2-zip"
-php83="php8.3-fpm php8.3-curl php8.3-common php8.3-bcmath php8.3-bz2 php8.3-intl php8.3-gd php8.3-mbstring php8.3-mysql php8.3-zip"
+php80="php8.0-fpm php8.0-curl php8.0-common php8.0-bcmath php8.0-bz2 php8.0-intl php8.0-gd php8.0-mbstring php8.0-mysql php8.0-zip php8.0-xml"
+php81="php8.1-fpm php8.1-curl php8.1-common php8.1-bcmath php8.1-bz2 php8.1-intl php8.1-gd php8.1-mbstring php8.1-mysql php8.1-zip php8.1-xml"
+php82="php8.2-fpm php8.2-curl php8.2-common php8.2-bcmath php8.2-bz2 php8.2-intl php8.2-gd php8.2-mbstring php8.2-mysql php8.2-zip php8.2-xml"
+php83="php8.3-fpm php8.3-curl php8.3-common php8.3-bcmath php8.3-bz2 php8.3-intl php8.3-gd php8.3-mbstring php8.3-mysql php8.3-zip php8.3-xml"
 # ---------------------------------------------------------------------------- #
 # FUNCTIONS                                                                    #
 # ---------------------------------------------------------------------------- #
@@ -91,11 +91,12 @@ systemmanager-install() {
 }
 
 function mysqlcred(){
-	if [ ! -f ${mysqlpwd} ]; then
+	if [ ! -f ${mysqlcred} ]; then
 		echo-red "Please enter mysql username"
 	    	read mysqluser
 		echo-red "Please enter mysql password"
 		read mysqluserpasswd
+                touch ${mysqlcred} 
 #save mysql credentials in file for further uses
 		echo -e "${mysqluser}\n${mysqluserpasswd}" > ${mysqlcred}
 	else
@@ -118,11 +119,11 @@ load-dialog () {
                 5 "Php7.1" $onoff
                 6 "Php7.2" $onoff
                 7 "Php7.3" $onoff
-                8 "Php7.4" $onoff
+                8 "Php7.4" on
                 9 "Php8.0" on
-                10 "Php8.1" $onoff
-                11 "Php8.2" $onoff
-                12 "Php8.3" $onoff
+                10 "Php8.1" on
+                11 "Php8.2" on
+                12 "Php8.3" on
                 13 "Vscode" on
                 14 "Google Chrome" on
 
@@ -155,7 +156,8 @@ do
         10) php81fpm="$php81";; 
         11) php82fpm="$php82";; 
         12) php83fpm="$php83";;
-        13) vscode=on  
+        13) vscode="on";;
+        14) chrome="on";;
     esac
 done
 }
@@ -240,10 +242,8 @@ function rmdb(){
     fi    
 }
 function apacherepo(){
-    if [[ ! -z $Apache ]]; then
-        add-apt-repository ppa:ondrej/apache2 -y  > /dev/null 2>&1
-        add-apt-repository ppa:ondrej/php -y  > /dev/null 2>&1
-    fi
+        add-apt-repository ppa:ondrej/apache2 -y > /dev/null 2>&1
+        add-apt-repository ppa:ondrej/php -y > /dev/null 2>&1
 }
 function apacheconfig(){
     if [[ -z $Apache ]]; then
@@ -295,27 +295,56 @@ function phpmyadmin(){
     if grep -xqFe "Alias /phpmyadmin /usr/share/phpmyadmin" "/etc/apache2/phpmyadmin.conf"; then
         echo ""
     else
-cat << EOT > /etc/apache2/phpmyadmin.conf
-Alias /phpmyadmin /usr/share/phpmyadmin
+cat << EOT > /etc/apache2/sites-available/000-default.conf
+<VirtualHost *:80>
+        Alias /phpmyadmin /usr/share/phpmyadmin
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+        <Directory /usr/share/phpmyadmin>
+          Options FollowSymLinks
+            DirectoryIndex index.php
+            AllowOverride all
+            <FilesMatch \.php$>
+                        SetHandler "proxy:unix:/run/php/php8.0-fpm.sock|fcgi://localhost"
+            </FilesMatch>
+        </Directory>
+        <Directory /usr/share/phpmyadmin/setup>
+            Require all denied
+        </Directory>
 
-<Directory /usr/share/phpmyadmin>
-    Options FollowSymLinks
-    DirectoryIndex index.php
-    AllowOverride all
-    <FilesMatch \.php$>
-                SetHandler "proxy:unix:/run/php/php8.0-fpm.sock|fcgi://localhost"
-    </FilesMatch>
-</Directory>
-<Directory /usr/share/phpmyadmin/setup>
-    Require all denied
-</Directory>
-
-<Directory /usr/share/phpmyadmin/libraries>
-    Require all denied
-</Directory>
+        <Directory /usr/share/phpmyadmin/libraries>
+            Require all denied
+        </Directory>
+        ErrorLog /error.log
+        CustomLog /access.log combined
+</VirtualHost>
 EOT
-echo "Include /etc/apache2/phpmyadmin.conf" >> /etc/apache2/apache2.conf
-
+cat << EOT > /etc/php/8.0/fpm/pool.d/phpmyadmin.conf
+[php-fpm]
+user = www-data
+group = www-data
+listen = /run/php/php8.0-fpm.sock
+listen.owner = www-data
+listen.group = www-data
+listen.mode = 0660
+listen.allowed_clients = 127.0.0.1
+pm = ondemand
+pm.max_children = 10
+pm.max_requests = 20
+pm.max_spare_servers = 5
+pm.min_spare_servers = 1
+pm.process_idle_timeout = 10
+pm.start_servers = 0
+pm.status_path = /status
+access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{mili}d %{kilo}M %C%%"
+security.limit_extensions = .php .php3 .php4 .php5 .php7
+php_admin_flag[allow_url_fopen] = on
+php_admin_flag[log_errors] = on
+php_admin_value[disable_functions] = exec,passthru,shell_exec,system
+php_admin_value[short_open_tag] = on
+php_value[error_reporting] = E_ALL & ~E_NOTICE
+php_admin_flag[short_open_tag] = On
+EOT
     fi
     
 }
@@ -323,10 +352,7 @@ echo "Include /etc/apache2/phpmyadmin.conf" >> /etc/apache2/apache2.conf
 function reqpackages(){
 
     echo-green "Please wait while I'm installling essential packages, it may ask for input in initial phase."
-    for i in $requiredpkg
-    do
-        sudo apt-get install -y $i > /dev/null 2>&1
-    done
+        sudo apt-get install -y $requiredpkg > /dev/null 2>&1
 }
 
 function composer(){
@@ -394,10 +420,7 @@ function otherservices(){
 function installpackages(){
     sudo apt update -y  > /dev/null 2>&1
     echo-yellow "Please wait while installing selected packages"
-    for i in $Essentials $mariadb $apache2 $php70fpm $php71fpm $php72fpm $php73fpm $php74fpm $php80fpm $php81fpm $php82fpm $php83fpm; do
-  sudo apt install -y $i  > /dev/null 2>&1
-done
-    
+    apt install $mariadb $apache2 $php70fpm $php71fpm $php72fpm $php73fpm $php74fpm $php80fpm $php81fpm $php82fpm $php83fpm > /dev/null 2>&1
 }
 function chrome-browser(){
   wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
