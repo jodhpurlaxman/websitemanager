@@ -78,9 +78,9 @@ systemmanager-install() {
     cp -r $(pwd)/. $CONFDIR
     ln -s -f $CONFDIR/websitemanager /usr/bin/websitemanager
     ln -s -f $CONFDIR/systemmanager /usr/bin/systemmanager
-    grep -q "ALL ALL = NOPASSWD: /usr/bin/websitemanager, /usr/bin/systemmanager, /bin/systemctl restart apache2, /bin/kill" /etc/sudoers
+    grep -q "ALL ALL = NOPASSWD: /usr/bin/cat, /usr/bin/update-alternatives, /usr/bin/websitemanager, /usr/bin/systemmanager, /bin/systemctl restart apache2, /bin/kill" /etc/sudoers
     if [[ $? != 0 ]] ; then
-        echo "ALL ALL = NOPASSWD: /usr/bin/websitemanager, /usr/bin/systemmanager, /bin/systemctl restart apache2, /bin/kill" >> /etc/sudoers
+        echo "ALL ALL = NOPASSWD: /usr/bin/cat, /usr/bin/update-alternatives, /usr/bin/systemmanager, /bin/systemctl restart apache2, /bin/kill" >> /etc/sudoers
     fi
 
     echo
@@ -92,9 +92,10 @@ systemmanager-install() {
 
 function mysqlcred(){
 	if [ ! -f ${mysqlcred} ]; then
-		echo-red "Please enter mysql username"
+		echo-green "Setup Mysql account"
+		echo-yellow "Please enter mysql username"
 	    	read mysqluser
-		echo-red "Please enter mysql password"
+		echo-yellow "Please enter mysql password"
 		read mysqluserpasswd
                 touch ${mysqlcred} 
 #save mysql credentials in file for further uses
@@ -214,7 +215,7 @@ function mariadbselect(){
 }
 mariarepo(){
     if [ ! -z $dbv ] && [ ! -f /etc/apt/sources.list.d/mariadb.list ]; then
-        echo-green "selected database version is : Mariadb-server-10.$dbv"        
+        echo-green "Upgrading database to Mariadb-server-10.$dbv"        
         curl -LsS https://r.mariadb.com/downloads/mariadb_repo_setup | sudo bash -s -- --mariadb-server-version="mariadb-10.$dbv" > /dev/null 2>&1
     
     fi
@@ -223,23 +224,23 @@ function mariaupdate(){
     
 	if [ -d /var/lib/mysql ] ; then
 	    echo-red "Would you like to upgrade mariadb y/n" 
-	    read mariadb 
-        if [ "$mariadb" = "y" ];then
-        echo-red "Mariadb update requested"
-            rmdb
-            mariarepo
-            mariadbselect
+	    read mariadbupdate 
+		if [ "$mariadbupdate" = "y" ];then
+		echo-red "Mariadb datbase update requested"
+		rmdb
+		mariadbselect
+		mariarepo    
+		    
+		fi    
         else
-            mariarepo
-            mariadbselect    
+            mariadbselect
+	    mariarepo    
 	fi
-    
-    fi
 }
 function rmdb(){
-    if [[ $mariadb == 'y' ]]; then
+    if [[ $mariadbupdate == 'y' ]]; then
         rm /etc/apt/sources.list.d/mariadb*
-	echo-red "removing existing mariadb database" 
+	echo-red "Removing existing mariadb database" 
 	    apt remove -y mariadb-*  > /dev/null 2>&1
     fi    
 }
@@ -283,14 +284,14 @@ function updatewpcli(){
     mv wp-cli.phar '/usr/local/bin/wp'
     fi    
 }
-function ssl(){
+function sslsetup(){
     if [ ! -d "/etc/ssl/selfsigned" ] && [ ! -f "/etc/ssl/selfsigned/localhost.crt" ]; then
         mkdir -p /etc/ssl/selfsigned
         chmod +x "$CONFDIR/openssl/getcert.sh"
         cd $CONFDIR/openssl/
         echo-green "generating localhost SSL"
-        echo $pwd 
-        sh getcert.sh localhost
+        echo $PWD 
+        ./getcert.sh localhost
     fi    
 }
 function phpmyadmin(){
@@ -399,6 +400,7 @@ function reqpackages(){
 }
 
 function composer(){
+    echo-green "Installling composer"
     sudo sh -c "echo 'precedence ::ffff:0:0/96 100' >> /etc/gai.conf"
     rm -rf /usr/local/bin/composer && rm -rf /usr/bin/composer
     php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
@@ -408,12 +410,21 @@ function composer(){
     sudo mv composer.phar /usr/bin/composer
 }
 function dnssetup(){
-    systemctl disable systemd-resolved.service
-    systemctl stop systemd-resolved.service
-    unlink /etc/resolv.conf
-    touch  /etc/resolv.conf
-    echo "nameserver 192.168.0.3" > /etc/resolv.conf
-    echo "nameserver 1.1.1.1" >> /etc/resolv.conf
+    echo-red "Setup CustomDNS"
+    echo-red "Would you use CustomDNS  y/n" 
+    read customdns 
+    if [ "$customdns" = "y" ];then   
+	    systemctl disable systemd-resolved.service
+	    systemctl stop systemd-resolved.service
+	    unlink /etc/resolv.conf
+	    touch  /etc/resolv.conf
+	    echo-yellow "DNS1"
+	    read DNS1
+	    echo "nameserver 192.168.0.3" > /etc/resolv.conf
+	    echo-yellow "DNS2"
+	    read DNS2
+	    echo "nameserver 1.1.1.1" >> /etc/resolv.conf
+    fi
 }
 function mysqluser(){
     #echo "MySql username is $mysqluser"
@@ -425,7 +436,7 @@ function mysqluser(){
 
 
 
-#update-alternatives --set php /usr/bin/php8.0
+
 
 
 function servicesrestart(){
@@ -446,7 +457,8 @@ serviceslist=(
 for service in "${serviceslist[@]}"
 do
   if ! [[ -z ${!service+x} ]]; then
-   echo-yellow "enabling $service on startup"
+   echo-yellow "enabling services on startup:"
+   echo-green "$service enabled"
    sn=$(echo ${service} | echo "$service" | sed 's/[7-8]\B/&./g')
    service=$( echo ${sn} |sed 's/fpm/-fpm/g')
    systemctl daemon-reload
@@ -463,7 +475,7 @@ function otherservices(){
 }
 function installpackages(){
     sudo apt update -y  > /dev/null 2>&1
-    echo-yellow "Please wait while installing selected packages"
+    #echo-yellow "Please wait while installing selected packages"
     apt install -y $mariadb $apache2 $php70fpm $php71fpm $php72fpm $php73fpm $php74fpm $php80fpm $php81fpm $php82fpm $php83fpm > /dev/null 2>&1
 }
 function chrome-browser(){
@@ -478,9 +490,23 @@ function vscode(){
   snap install code --classic > /dev/null 2>&1
   fi
 }
+function setupphpcli(){
+spacer
+echo-green "Setup default php cli version to 8.1"
+update-alternatives --set php /usr/bin/php8.1 > /dev/null 2>&1
+echo-green "set php8.1 as a default php version"
+echo-yellow "you can use following commond to set default php CLI version"
+echo-red "sudo update-alternatives --set php /usr/bin/php8.2"
+spacer
+}
+
+function spacer(){
+echo "============================================================================================================="
+echo "============================================================================================================="
+}
 
 function success(){
- echo-yellow "=========================================  Installation sucessfully completed  ========================================= "  
+ echo-green "=================================  Installation sucessfully completed  ==============================="  
 }
 
 #execute functions
@@ -490,13 +516,17 @@ systemmanager-verify-sudo
 systemmanager-install
 #echo-green "Executing Func. reqpackages"
 reqpackages
-#echo-green "Executing Func. mariaupdate"
-mariaupdate
-#echo-green "Executing Func. mariarepo"
-mariarepo
 #echo-green "Executing Func. installpkgselect"
 installpkgselect
-echo-green "Please wait while installing the required packages"
+#echo-green "Executing Func. mariaupdate"
+mariaupdate
+#echo-green "Executing Func. dnssetup"
+spacer
+dnssetup
+#echo-green "Executing Func. mariarepo"
+mariarepo
+echo-green "Please wait while installing the required & selected packages"
+spacer
 apacherepo
 installpackages
 #echo-green "Executing Func. apacheconfig"
@@ -508,11 +538,10 @@ phpconfig
 #echo-green "Executing Func. updatewpcli"
 updatewpcli
 #echo-green "Executing Func. composer"
+spacer
 composer
-#echo-green "Executing Func. dnssetup"
-dnssetup
 #echo-green "Executing Func. ssl"
-ssl
+sslsetup
 #echo-green "Executing Func. servicesrestart"
 servicesrestart
 #echo-green "Executing Func. mysqlcred"
@@ -523,4 +552,7 @@ mysqluser
 chrome-browser
 #echo-green "Executing Func. vscode"
 vscode
+spacer
+setupphpcli
 success
+spacer
