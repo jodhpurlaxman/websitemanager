@@ -214,7 +214,6 @@ function mariadbselect(){
 }
 mariarepo(){
     if [ ! -z $dbv ] && [ ! -f /etc/apt/sources.list.d/mariadb.list ]; then
-        mariadbselect
         echo-green "selected database version is : Mariadb-server-10.$dbv"        
         curl -LsS https://r.mariadb.com/downloads/mariadb_repo_setup | sudo bash -s -- --mariadb-server-version="mariadb-10.$dbv" > /dev/null 2>&1
     
@@ -227,10 +226,13 @@ function mariaupdate(){
 	    read mariadb 
         if [ "$mariadb" = "y" ];then
         echo-red "Mariadb update requested"
-            mariadbselect
-            mariarepo
             rmdb
-	    fi
+            mariarepo
+            mariadbselect
+        else
+            mariarepo
+            mariadbselect    
+	fi
     
     fi
 }
@@ -246,15 +248,18 @@ function apacherepo(){
         add-apt-repository ppa:ondrej/php -y > /dev/null 2>&1
 }
 function apacheconfig(){
-    if [[ -z $Apache ]]; then
-        sed -i '/#<Directory/i \
-        <Directory /home/*/public_html/> \
-        Options Indexes FollowSymLinks \
-        AllowOverride ALL \
-        Require all granted \
-        </Directory>' /etc/apache2/apache2.conf
+    if [[ -z $Apache ]];then
+        grep -q "/home/*/public_html" "/etc/apache2/apache2.conf" 
+        if [[ $? != 0 ]] ; then
+sed -i '/#<Directory/i \
+<Directory /home/*/public_html/> \
+Options Indexes FollowSymLinks \
+AllowOverride ALL \
+Require all granted \
+</Directory>' /etc/apache2/apache2.conf
+fi
     a2enmod "proxy proxy_http proxy_fcgi setenvif actions alias auth_basic env expires headers http2 mime ssl rewrite request mpm_itk" > /dev/null 2>&1
-    a2enconf  "php-fpm php7.0-fpm php7.1-fpm  php7.2-fpm php7.3-fpm php7.4-fpm php8.0-fpm php8.1-fpm php8.2-fpm php8.3-fpm"  > /dev/null 2>&1
+    a2enconf  "php-fpm php7.0-fpm php7.1-fpm php7.2-fpm php7.3-fpm php7.4-fpm php8.0-fpm php8.1-fpm php8.2-fpm php8.3-fpm"  > /dev/null 2>&1
     fi
 }
 
@@ -279,20 +284,27 @@ function updatewpcli(){
     fi    
 }
 function ssl(){
-    if [ ! -d "/etc/ssl/selfsigned" ]; then
+    if [ ! -d "/etc/ssl/selfsigned" ] && [ ! -f "/etc/ssl/selfsigned/localhost.crt" ]; then
         mkdir -p /etc/ssl/selfsigned
         chmod +x "$CONFDIR/openssl/getcert.sh"
+        cd $CONFDIR/openssl/
+        echo-green "generating localhost SSL"
+        echo $pwd 
+        sh getcert.sh localhost
     fi    
 }
 function phpmyadmin(){
-    #if [ ! -d "/usr/share/phpmyadmin" ]; then
+    if [ ! -d "/usr/share/phpmyadmin" ]; then
     rm -rf /usr/share/phpmyadmin/
     mkdir -p /usr/share/phpmyadmin
-    wget https://files.phpmyadmin.net/phpMyAdmin/5.2.0/phpMyAdmin-5.2.0-all-languages.zip -O /usr/share/phpmyadmin/phpmyadmin5.2.0.zip
+    wget -q https://files.phpmyadmin.net/phpMyAdmin/5.2.0/phpMyAdmin-5.2.0-all-languages.zip -O /usr/share/phpmyadmin/phpmyadmin5.2.0.zip
 
     cd /usr/share/phpmyadmin/ && unzip -qq phpmyadmin5.2.0.zip && mv phpMyAdmin-5.2.0-all-languages/* .
     rm -rf /usr/share/phpmyadmin/phpmyadmin5.2.0.zip phpMyAdmin-5.2.0-all-languages
-    if grep -xqFe "Alias /phpmyadmin /usr/share/phpmyadmin" "/etc/apache2/phpmyadmin.conf"; then
+    if [ -f "/etc/apache2/sites-available/default-ssl.conf" ]; then
+       rm -f /etc/apache2/sites-available/default-ssl.conf
+    fi   
+    if grep -xqFe "Alias /phpmyadmin /usr/share/phpmyadmin" "/etc/apache2/sites-available/000-default.conf"; then
         echo ""
     else
 cat << EOT > /etc/apache2/sites-available/000-default.conf
@@ -300,6 +312,7 @@ cat << EOT > /etc/apache2/sites-available/000-default.conf
         Alias /phpmyadmin /usr/share/phpmyadmin
         ServerAdmin webmaster@localhost
         DocumentRoot /var/www/html
+        ServerName localhost
         <Directory /usr/share/phpmyadmin>
           Options FollowSymLinks
             DirectoryIndex index.php
@@ -318,6 +331,35 @@ cat << EOT > /etc/apache2/sites-available/000-default.conf
         ErrorLog /error.log
         CustomLog /access.log combined
 </VirtualHost>
+<IfModule mod_ssl.c>
+<VirtualHost *:443>
+        Alias /phpmyadmin /usr/share/phpmyadmin
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/html
+        ServerName localhost
+        SSLEngine on
+		SSLCertificateFile      /etc/ssl/selfsigned/localhost.crt
+            SSLCertificateKeyFile   /etc/ssl/selfsigned/localhost.key
+            SSLCACertificateFile /etc/ssl/selfsigned/ca-bundle.pem
+        <Directory /usr/share/phpmyadmin>
+          Options FollowSymLinks
+            DirectoryIndex index.php
+            AllowOverride all
+            <FilesMatch \.php$>
+                        SetHandler "proxy:unix:/run/php/php8.0-fpm.sock|fcgi://localhost"
+            </FilesMatch>
+        </Directory>
+        <Directory /usr/share/phpmyadmin/setup>
+            Require all denied
+        </Directory>
+
+        <Directory /usr/share/phpmyadmin/libraries>
+            Require all denied
+        </Directory>
+        ErrorLog /error.log
+        CustomLog /access.log combined
+</VirtualHost>
+</IfModule>
 EOT
 cat << EOT > /etc/php/8.0/fpm/pool.d/phpmyadmin.conf
 [php-fpm]
@@ -345,7 +387,8 @@ php_admin_value[short_open_tag] = on
 php_value[error_reporting] = E_ALL & ~E_NOTICE
 php_admin_flag[short_open_tag] = On
 EOT
-    fi
+fi
+fi
     
 }
 
@@ -403,9 +446,10 @@ serviceslist=(
 for service in "${serviceslist[@]}"
 do
   if ! [[ -z ${!service+x} ]]; then
+   echo-yellow "enabling $service on startup"
    sn=$(echo ${service} | echo "$service" | sed 's/[7-8]\B/&./g')
    service=$( echo ${sn} |sed 's/fpm/-fpm/g')
-   cp $CONFDIR/phpini-templates/php$i.conf /etc/php/$i/fpm/php.ini
+   systemctl daemon-reload
    systemctl enable  $service > /dev/null 2>&1
    systemctl start $service > /dev/null 2>&1
             
@@ -420,48 +464,63 @@ function otherservices(){
 function installpackages(){
     sudo apt update -y  > /dev/null 2>&1
     echo-yellow "Please wait while installing selected packages"
-    apt install $mariadb $apache2 $php70fpm $php71fpm $php72fpm $php73fpm $php74fpm $php80fpm $php81fpm $php82fpm $php83fpm > /dev/null 2>&1
+    apt install -y $mariadb $apache2 $php70fpm $php71fpm $php72fpm $php73fpm $php74fpm $php80fpm $php81fpm $php82fpm $php83fpm > /dev/null 2>&1
 }
 function chrome-browser(){
+  if [ $chrome == "on" ];then 
   wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   apt install -y -f ./google-chrome-stable_current_amd64.deb > /dev/null 2>&1
+  rm google-chrome-stable_current_amd64.deb
+  fi
+}
+function vscode(){
+  if [ $vscode == "on" ];then  
+  snap install code --classic > /dev/null 2>&1
+  fi
 }
 
+function success(){
+ echo-yellow "=========================================  Installation sucessfully completed  ========================================= "  
+}
 
 #execute functions
-echo-green "Executing Func. systemmanager-verify-sudo" 
+#echo-green "Executing Func. systemmanager-verify-sudo" 
 systemmanager-verify-sudo
-echo-green "Executing Func. systemmanager-install"
+#echo-green "Executing Func. systemmanager-install"
 systemmanager-install
-echo-green "Executing Func. reqpackages"
+#echo-green "Executing Func. reqpackages"
 reqpackages
-echo-green "Executing Func. mariaupdate"
+#echo-green "Executing Func. mariaupdate"
 mariaupdate
-echo-green "Executing Func. mariarepo"
+#echo-green "Executing Func. mariarepo"
 mariarepo
-echo-green "Executing Func. installpkgselect"
+#echo-green "Executing Func. installpkgselect"
 installpkgselect
-echo-green "Executing Func. apacherepo"
+echo-green "Please wait while installing the required packages"
 apacherepo
-echo-green "Executing Func. installpackages"
 installpackages
-echo-green "Executing Func. apacheconfig"
+#echo-green "Executing Func. apacheconfig"
 apacheconfig
-echo-green "Executing Func. phpmyadmin"
+#echo-green "Executing Func. phpmyadmin"
 phpmyadmin
-echo-green "Executing Func. phpconfig"
+#echo-green "Executing Func. phpconfig"
 phpconfig
-echo-green "Executing Func. updatewpcli"
+#echo-green "Executing Func. updatewpcli"
 updatewpcli
-echo-green "Executing Func. composer"
+#echo-green "Executing Func. composer"
 composer
-echo-green "Executing Func. dnssetup"
+#echo-green "Executing Func. dnssetup"
 dnssetup
-echo-green "Executing Func. servicesrestart"
+#echo-green "Executing Func. ssl"
+ssl
+#echo-green "Executing Func. servicesrestart"
 servicesrestart
-echo-green "Executing Func. mysqlcred"
+#echo-green "Executing Func. mysqlcred"
 mysqlcred
-echo-green "Executing Func. mysqluser"
+#echo-green "Executing Func. mysqluser"
 mysqluser
-echo-green "Executing Func. chrome-browser"
+#echo-green "Executing Func. chrome-browser"
 chrome-browser
+#echo-green "Executing Func. vscode"
+vscode
+success
