@@ -80,7 +80,7 @@ systemmanager-install() {
     ln -s -f $CONFDIR/systemmanager /usr/bin/systemmanager
     grep -q "ALL ALL = NOPASSWD: /usr/bin/cat, /usr/bin/update-alternatives, /usr/bin/websitemanager, /usr/bin/systemmanager, /bin/systemctl restart apache2, /bin/kill" /etc/sudoers
     if [[ $? != 0 ]] ; then
-        echo "ALL ALL = NOPASSWD: /usr/bin/cat, /usr/bin/update-alternatives, /usr/bin/systemmanager, /bin/systemctl restart apache2, /bin/kill" >> /etc/sudoers
+        echo "ALL ALL = NOPASSWD: /usr/bin/cat, /usr/bin/update-alternatives, /usr/bin/websitemanager, /usr/bin/systemmanager, /bin/systemctl restart apache2, /bin/kill" >> /etc/sudoers
     fi
 
     echo
@@ -251,7 +251,7 @@ function apacherepo(){
 function apacheconfig(){
     if [[ -z $Apache ]];then
         grep -q "/home/*/public_html" "/etc/apache2/apache2.conf" 
-        if [[ $? != 0 ]] ; then
+        if [[ $? == 0 ]] ; then
 sed -i '/#<Directory/i \
 <Directory /home/*/public_html/> \
 Options Indexes FollowSymLinks \
