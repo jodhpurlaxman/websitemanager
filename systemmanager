@@ -14,7 +14,7 @@ YELLOW='\033[0;33m'
 NC='\033[0m'
 CONFDIR="/opt/websitemanager"
 mysqlcred="/opt/websitemanager/mysql"
-requiredpkg="unzip git build-essential libtool autoconf software-properties-common curl wget gcc g++ make dirmngr apt-transport-https dialog"
+requiredpkg="unzip git build-essential libtool autoconf software-properties-common curl wget gcc g++ make dirmngr apt-transport-https dialog libnss3-tools"
 commonpkg="git filezilla cifs-utils resolvconf openssh-server"
 databasepkg="mariadb-client mariadb-server"
 apache="apache2 apache2-utils libapache2-mpm-itk openssl"
@@ -289,8 +289,7 @@ function sslsetup(){
         mkdir -p /etc/ssl/selfsigned
         chmod +x "$CONFDIR/openssl/getcert.sh"
         cd $CONFDIR/openssl/
-        echo-green "generating localhost SSL"
-        echo $PWD 
+        echo-green "generating localhost SSL"         
         ./getcert.sh localhost
     fi    
 }
@@ -498,6 +497,10 @@ echo-green "set php8.1 as a default php version"
 echo-yellow "you can use following commond to set default php CLI version"
 echo-red "sudo update-alternatives --set php /usr/bin/php8.2"
 spacer
+}
+
+function installCAbrowsers(){
+  echo ''
 }
 
 function spacer(){
