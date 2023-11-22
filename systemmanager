@@ -516,7 +516,7 @@ function success(){
 #echo-green "Executing Func. systemmanager-verify-sudo" 
 systemmanager-verify-sudo
 #echo-green "Executing Func. systemmanager-install"
-systemmanager-install
+#systemmanager-install
 #echo-green "Executing Func. reqpackages"
 reqpackages
 #echo-green "Executing Func. installpkgselect"
