@@ -1,4 +1,5 @@
 **install git and clone the repo by following command **
+
 git clone https://github.com/jodhpurlaxman/websitemanager
 
 cd websitemanager
