@@ -52,7 +52,7 @@ websitemanager-credits() {
     cat <<splash
 ##############################################################################
 ##############################################################################
-# websitemanager v1.3.0 Created by LKY Rajpurohit <qualdev.laxman@gmail.com> #
+# websitemanager v1.3.0 Created by LKY Rajpurohit <jodhpur.laxman@gmail.com> #
 ##############################################################################
 ##############################################################################
 
@@ -130,7 +130,8 @@ websitemanager-install() {
     ln -s -f $CONFDIR/websitemanager /usr/bin/websitemanager
     ln -s -f $CONFDIR/systemmanager /usr/bin/systemmanager
 
-    echo-green "Script installed! use: websitemanager -h"
+    echo-green "Script installed! use: sudo systemanager #for packages installation"
+    echo-green "Script installed! use: sudo websitemanager # for websites vhosts creation"
 
     exit 0
 
