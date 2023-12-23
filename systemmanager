@@ -251,7 +251,7 @@ function apacherepo(){
 function apacheconfig(){
     if [[ -z $Apache ]];then
         grep -q "/home/*/public_html" "/etc/apache2/apache2.conf" 
-        if [[ $? == 0 ]] ; then
+        if [[ $? != 0 ]] ; then
 sed -i '/#<Directory/i \
 <Directory /home/*/public_html/> \
 Options Indexes FollowSymLinks \
