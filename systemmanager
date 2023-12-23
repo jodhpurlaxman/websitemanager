@@ -509,6 +509,7 @@ function success(){
 }
 
 #execute functions
+sudo apt update -qq 
 #echo-green "Executing Func. systemmanager-verify-sudo" 
 systemmanager-verify-sudo
 #echo-green "Executing Func. systemmanager-install"
