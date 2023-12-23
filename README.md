@@ -7,7 +7,7 @@ chmod +x ./websitemanager
 
 sudo ./websitemanager -install
 
-sudo systemmamanger
+sudo systemmanager
 
 Now your system is ready for use
 run "sudo websitemanager" for domain and site setup
