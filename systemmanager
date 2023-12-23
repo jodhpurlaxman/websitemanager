@@ -85,7 +85,7 @@ systemmanager-install() {
 
     echo
     echo
-    echo-green "Script installed! use: systemmanager and websitemanager"
+    echo-green "Script installed! use: sudo systemmanager sudo and websitemanager"
     echo
     echo
 }
