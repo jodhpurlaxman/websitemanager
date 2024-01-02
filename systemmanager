@@ -297,10 +297,10 @@ function phpmyadmin(){
     mkdir -p /usr/share/phpmyadmin
     fi
     if [ ! -f "/usr/share/phpmyadmin/index.php" ]; then
-    sudo wget -q https://files.phpmyadmin.net/phpMyAdmin/5.2.0/phpMyAdmin-5.2.0-all-languages.zip -O /usr/share/phpmyadmin/phpmyadmin5.2.0.zip
+    sudo wget -q https://files.phpmyadmin.net/phpMyAdmin/5.2.1/phpMyAdmin-5.2.1-all-languages.zip -O /usr/share/phpmyadmin/phpmyadmin5.2.1.zip
 
-    cd /usr/share/phpmyadmin/ && unzip -qq phpmyadmin5.2.0.zip && mv phpMyAdmin-5.2.0-all-languages/* .
-    rm -rf /usr/share/phpmyadmin/phpmyadmin5.2.0.zip phpMyAdmin-5.2.0-all-languages
+    cd /usr/share/phpmyadmin/ && unzip -qq phpmyadmin5.2.1.zip && mv phpMyAdmin-5.2.1-all-languages/* .
+    rm -rf /usr/share/phpmyadmin/phpmyadmin5.2.1.zip phpMyAdmin-5.2.1-all-languages
      
     if [ -f "/etc/apache2/sites-available/default-ssl.conf" ]; then
        rm -f /etc/apache2/sites-available/default-ssl.conf
