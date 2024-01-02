@@ -211,7 +211,7 @@ function mariadbselect(){
 }
 mariarepo(){
     if [ ! -z $dbv ] && [ ! -f /etc/apt/sources.list.d/mariadb.list ]; then
-        if [ ! -f "$mariadbupdate" ];then
+        if [ ! -z "$mariadbupdate" ];then
            echo-green "Upgrading database to Mariadb-server-10.$dbv"        
         fi 
     curl -LsS https://r.mariadb.com/downloads/mariadb_repo_setup | sudo bash -s -- --mariadb-server-version="mariadb-10.$dbv" > /dev/null 2>&1
@@ -293,7 +293,7 @@ function sslsetup(){
     fi    
 }
 function phpmyadmin(){
-    if [ ! -d "/usr/share/phpmyadmin" ]:then
+    if [ ! -d "/usr/share/phpmyadmin" ];then
     mkdir -p /usr/share/phpmyadmin
     fi
     if [ ! -f "/usr/share/phpmyadmin/index.php" ]; then
