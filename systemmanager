@@ -237,8 +237,12 @@ function mariaupdate(){
 }
 function rmdb(){
     if [[ $mariadbupdate == 'y' ]]; then
+        backupname=$
+        echo-red "taking existing databases backup to /var/lib/mysql_backup_$backupname"
+        echo-red "it may take log time depend upon size of all DBs"
+        service mysql stop && cp -r /var/lib/mysql /var/lib/mysql_backup_$backupname && service mysql stop
         rm /etc/apt/sources.list.d/mariadb*
-	echo-red "Removing existing mariadb database" 
+	echo-red "Removing existing mariadb database engine" 
 	    apt remove -y mariadb-*  > /dev/null 2>&1
     fi    
 }
@@ -394,7 +398,6 @@ fi
 }
 
 function reqpackages(){
-
     echo-green "Please wait while I'm installling essential packages, it may ask for input in initial phase."
         sudo apt-get install -y $requiredpkg > /dev/null 2>&1
 }
@@ -411,7 +414,8 @@ function composer(){
 }
 function dnssetup(){
     echo-red "Setup CustomDNS"
-    echo-red "Would you use CustomDNS  y/n" 
+    customdns="n"
+    echo-red "Would you use CustomDNS  y/N" 
     read customdns 
     if [ "$customdns" = "y" ];then   
 	    systemctl disable systemd-resolved.service
