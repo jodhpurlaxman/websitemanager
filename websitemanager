@@ -368,9 +368,24 @@ elif [ "$FRAMEWORK" == "wordpress" ]; then
     sudo mysql -e "CREATE DATABASE $DB;"
     cp /home/$username/public_html/sites/$DOMAIN/wp-config-sample.php /home/$username/public_html/sites/$DOMAIN/wp-config.php
     sed -i 's/database_name_here/'$DB'/' /home/$username/public_html/sites/$DOMAIN/wp-config.php
-    sed -i 's/username_here/qualdev/' /home/$username/public_html/sites/$DOMAIN/wp-config.php
-    sed -i 's/password_here/P@q2w3efg/' /home/$username/public_html/sites/$DOMAIN/wp-config.php
+    sed -i 's/username_here/$mysqluser/' /home/$username/public_html/sites/$DOMAIN/wp-config.php
+    sed -i 's/password_here/$mysqluserpasswd/' /home/$username/public_html/sites/$DOMAIN/wp-config.php
     chown -R $username:$username "/home/$username/public_html/sites/$DOMAIN"
+fi
+}
+function mysqlcred(){
+	if [ ! -f ${mysqlcred} ]; then
+		echo-green "Setup Mysql account"
+		echo-yellow "Please enter mysql username"
+	    	read mysqluser
+		echo-yellow "Please enter mysql password"
+		read mysqluserpasswd
+                touch ${mysqlcred} 
+#save mysql credentials in file for further uses
+		echo -e "${mysqluser}\n${mysqluserpasswd}" > ${mysqlcred}
+	else
+	    mysqluser=$(head -n 1 ${mysqlcred})
+	    mysqluserpasswd=$(tail -n 1 ${mysqlcred})  
 fi
 }
 function setupphpcli(){
@@ -480,6 +495,7 @@ websitemanager-generate-pool;
 websitemanager-point-ip;
 websitemanager-ssl-generate;
 websitemanager-enable-reload;
+mysqlcred;
 install_framework;
 setupphpcli;
 exit 0
