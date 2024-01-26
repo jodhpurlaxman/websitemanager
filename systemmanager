@@ -89,7 +89,7 @@ systemmanager-install() {
 function mysqlcred(){
 	if [ ! -f ${mysqlcred} ]; then
 		echo-green "Setup Mysql account"
-		echo-yellow "Please enter mysql username"
+		echo-yellow "Please enter mysql username other then root"
 	    	read mysqluser
 		echo-yellow "Please enter mysql password"
 		read mysqluserpasswd
