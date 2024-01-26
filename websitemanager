@@ -376,7 +376,7 @@ fi
 function mysqlcred(){
 echo-yellow "test1"
 	if [ ! -f ${mysqlcred} ]; then
-echo-yellow "test 2
+echo-yellow "test 2"
 		echo-green "Setup Mysql account"
 		echo-yellow "Please enter mysql username"
 	    	read mysqluser
