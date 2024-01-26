@@ -350,7 +350,8 @@ install_framework(){
     
 if [ "$FRAMEWORK" == "laravel" ]; then
     echo-green "================================="
-    echo-green "downloading and installing latest Laravel version"	
+    echo-green "downloading and installing latest Laravel version"
+        export COMPOSER_ALLOW_SUPERUSER=1
  	composer create-project laravel/laravel "/home/$username/public_html/sites/$DOMAIN"
 	chown -R $username:$username "/home/$username/public_html/sites/$DOMAIN"
     temp_DB=${DOMAIN%.*}
