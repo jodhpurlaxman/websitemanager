@@ -14,7 +14,7 @@ YELLOW='\033[0;33m'
 NC='\033[0m'
 CONFDIR="/opt/websitemanager"
 mysqlcred="/opt/websitemanager/mysql"
-requiredpkg="unzip git build-essential libtool autoconf software-properties-common curl wget gcc g++ make dirmngr apt-transport-https dialog libnss3-tools"
+requiredpkg="unzip git build-essential ca-certificates libnss3-tools libtool autoconf software-properties-common curl wget gcc g++ make dirmngr apt-transport-https dialog libnss3-tools"
 commonpkg="git filezilla cifs-utils resolvconf openssh-server"
 databasepkg="mariadb-client mariadb-server"
 apache="apache2 apache2-utils libapache2-mpm-itk openssl"
@@ -221,6 +221,7 @@ mariarepo(){
 function mariaupdate(){
     
 	if [ -d /var/lib/mysql ] ; then
+            mariadbupdate='n'
 	    echo-red "Would you like to upgrade mariadb y/n" 
 	    read mariadbupdate 
 		if [ "$mariadbupdate" = "y" ];then
@@ -237,7 +238,7 @@ function mariaupdate(){
 }
 function rmdb(){
     if [[ $mariadbupdate == 'y' ]]; then
-        backupname=$
+        backupname=$RANDOM
         echo-red "taking existing databases backup to /var/lib/mysql_backup_$backupname"
         echo-red "it may take log time depend upon size of all DBs"
         service mysql stop && cp -r /var/lib/mysql /var/lib/mysql_backup_$backupname && service mysql stop
@@ -437,12 +438,6 @@ function mysqluser(){
     mysql -e "FLUSH PRIVILEGES;"
 }
 
-
-
-
-
-
-
 function servicesrestart(){
 serviceslist=(
         mariadb
@@ -497,7 +492,7 @@ function vscode(){
 function setupphpcli(){
 spacer
 echo-green "Setup default php cli version to 8.1"
-update-alternatives --set php /usr/bin/php8.1 > /dev/null 2>&1
+update-alternatives --set php /usr/bin/php8.0 > /dev/null 2>&1
 echo-green "set php8.1 as a default php version"
 echo-yellow "you can use following commond to set default php CLI version"
 echo-red "sudo update-alternatives --set php /usr/bin/php8.2"
@@ -505,7 +500,18 @@ spacer
 }
 
 function installCAbrowsers(){
-  echo ''
+  echo 'installing CUSTOM CA Cert'
+  if [ ! -d "/usr/local/share/ca-certificates" ];then
+	mkdir -p /usr/local/share/ca-certificates
+  fi
+  if [ ! -f "/usr/local/share/ca-certificates/local-ca.crt" ];then
+    cp $CONFDIR/openssl/ca-bundle.pem /usr/local/share/ca-certificates/local-ca.crt && update-ca-certificates
+    #
+    for userlist in "/home/*";do 
+    certutil -d sql:$userlist/.pki/nssdb -A -t "TC,," -n "LKY CA" -i /usr/local/share/ca-certificates/local-ca.crt
+   done
+  fi
+
 }
 
 function spacer(){
@@ -558,6 +564,8 @@ servicesrestart
 mysqlcred
 #echo-green "Executing Func. mysqluser"
 mysqluser
+#installing installCAbrowsers for system and users
+installCAbrowsers
 #echo-green "Executing Func. chrome-browser"
 chrome-browser
 #echo-green "Executing Func. vscode"
