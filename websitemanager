@@ -17,6 +17,7 @@ NC='\033[0m'
 POOL_TEMPLATE="/opt/websitemanager/phpini-templates/php-fpm.conf"
 HAS_POOL_TEMPLATE="0"
 USERNAME=""
+mysqlcred="/opt/websitemanager/mysql"
 # ---------------------------------------------------------------------------- #
 # FUNCTIONS                                                                    #
 # ---------------------------------------------------------------------------- #
