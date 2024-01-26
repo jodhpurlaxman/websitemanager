@@ -23,10 +23,15 @@ websitemanager -d localhost.local -pv {7.0 - 8.3} -t {default,laravel,node} -f {
 **#defination of perameters**
 
 -d == domainname
+
 -t == predefined vhost sample for {default,laravel,node}
+
 -f == if you want install framework along with vhost configuration
+
 -p == proxy port for node application
+
 -pv == custom php version like 7.0 to 8.3
+
 -u == other or own username of your system
 
 
