@@ -371,9 +371,16 @@ elif [ "$FRAMEWORK" == "wordpress" ]; then
     sed -i 's/username_here/qualdev/' /home/$username/public_html/sites/$DOMAIN/wp-config.php
     sed -i 's/password_here/P@q2w3efg/' /home/$username/public_html/sites/$DOMAIN/wp-config.php
     chown -R $username:$username "/home/$username/public_html/sites/$DOMAIN"
-else 
-	echo-yellow "No framework passed for auto installation"	
 fi
+}
+function setupphpcli(){
+spacer
+echo-green "Setup default php cli version to 8.1"
+update-alternatives --set php /usr/bin/php$PHP_VERSION > /dev/null 2>&1
+echo-green "set php8.1 as a default php version"
+echo-yellow "you can use following commond to set default php CLI version"
+echo-red "sudo update-alternatives --set php /usr/bin/php8.2"
+spacer
 }
 
 verifyuserinput(){
@@ -474,4 +481,5 @@ websitemanager-point-ip;
 websitemanager-ssl-generate;
 websitemanager-enable-reload;
 install_framework;
+setupphpcli;
 exit 0
