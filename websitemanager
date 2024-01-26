@@ -100,12 +100,12 @@ USAGE
 
     echo "Examples:"
     echo
-    echo-yellow "Example: for creating a vhost domain \"sitename.dev\" with the template \"laravel\" and php version 7.2 use below command"
-    echo-green "sudo websitemanager -d sitename.dev -t default/laravel/node -f laravel/wordpress -pv 7.2  -u username #without -pv it will set php8.0 as default php version, if framework not defined it will not install it"
+    echo-yellow "Example: for creating a vhost domain \"sitename.dev\" with the template \"wordpress\" and php version 7.2 use below command"
+    echo-green "sudo websitemanager -d sitename.dev -t default -f wordpress -pv 7.2  -u {yoursystemusername} #without -pv it will set php8.0 as default php version, if framework -f not defined it will not install it"
     echo-red "Explanation of flags"
-    echo-green "-d domainname"
-    echo-green "-pv php version i.e 7.1, 7.2"
-    echo-green "-dr document root of domain i.e /full_path_of_existing_folder"
+    echo-green "-d domainname  // mandatory option"
+    echo-green "-pv php version i.e 7.1, 7.2, 8.3"
+    echo-green "-dr custom document root of domain i.e /full_path_of_existing_folder, default is /home/{yoursystemusername}/public_html/sites/$domain"
     echo-green "-p port only applicable if -t is node "
     echo-green "-t apache vhost template i.e default, laravel, node "
     echo-green "-f install framework while creating vhost i.e laravel, wordpress"
