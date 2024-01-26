@@ -341,7 +341,7 @@ websitemanager-enable-reload() {
 install_framework(){
  if [ -z "$DOCUMENT_ROOT" ]; then
  if [ -z "$(ls -A /home/$username/public_html/sites/$DOMAIN)" ]; then
-    echo "verify directory is Empty"
+    echo ""
  else
     echo-red "warning: document root directory is not empty, exiting installer"
     exit 1
@@ -354,9 +354,13 @@ if [ "$FRAMEWORK" == "laravel" ]; then
  	composer create-project laravel/laravel "/home/$username/public_html/sites/$DOMAIN"
 	chown -R $username:$username "/home/$username/public_html/sites/$DOMAIN"
     temp_DB=${DOMAIN%.*}
-    #DB=$(echo ${username}'_'${temp_DB})
+    temp_DB==$(sed "s/-/_/g" <<< "$temp_DB")
     DB=${username}_${temp_DB} 
     sudo mysql -e "CREATE DATABASE $DB;"
+    sed -i 's/laravel/'$DB'/' /home/$username/public_html/sites/$DOMAIN/.env
+    sed -i 's/root/$mysqluser/' /home/$username/public_html/sites/$DOMAIN/.env
+    sed -i 's/DB_PASSWORD=/DB_PASSWORD=$mysqluserpasswd/' /home/$username/public_html/sites/$DOMAIN/.env
+
 elif [ "$FRAMEWORK" == "wordpress" ]; then
 	cd /tmp
     echo-green "=================================="
@@ -375,29 +379,26 @@ elif [ "$FRAMEWORK" == "wordpress" ]; then
 fi
 }
 function mysqlcred(){
-echo-yellow "test1"
 	if [ ! -f ${mysqlcred} ]; then
-echo-yellow "test 2"
 		echo-green "Setup Mysql account"
-		echo-yellow "Please enter mysql username"
+		echo-yellow "Please enter mysql username other then root"
 	    	read mysqluser
 		echo-yellow "Please enter mysql password"
 		read mysqluserpasswd
                 touch ${mysqlcred} 
-#save mysql credentials in file for further uses
+                #save mysql credentials in file for further uses
 		echo -e "${mysqluser}\n${mysqluserpasswd}" > ${mysqlcred}
 	else
-           echo-yellow "test else"
 	    mysqluser=$(head -n 1 ${mysqlcred})
 	    mysqluserpasswd=$(tail -n 1 ${mysqlcred})
- echo-yellow "test else end php$PHP_VERSION"
 fi
 }
+
 function setupphpcli(){
 echo-green "Setup default php cli version to 8.1"
-update-alternatives --set php /usr/bin/php$PHP_VERSION > /dev/null 2>&1
+update-alternatives --set php /usr/bin/$PHP_VERSION > /dev/null 2>&1
 echo-green "set php8.1 as a default php version"
-echo-yellow "you can use following commond to set default php CLI version"
+echo-yellow "you can use following commond to set default php CLI version via terminal"
 echo-red "sudo update-alternatives --set php /usr/bin/php8.2"
 
 }
