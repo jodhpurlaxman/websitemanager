@@ -388,7 +388,8 @@ echo-yellow "test 2"
 	else
            echo-yellow "test else"
 	    mysqluser=$(head -n 1 ${mysqlcred})
-	    mysqluserpasswd=$(tail -n 1 ${mysqlcred})  
+	    mysqluserpasswd=$(tail -n 1 ${mysqlcred})
+ echo-yellow "test else end php$PHP_VERSION"
 fi
 }
 function setupphpcli(){
