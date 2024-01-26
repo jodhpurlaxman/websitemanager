@@ -39,7 +39,7 @@ if [ ! -f "${CAFILE}" ]; then
     -key ${CAKEY} \
     -passout ${PASSOPT} \
     -out ${CAFILE} \
-    -subj "/C=US/ST=NewYork/L=New York co/O=Qualdev Inc./CN=Qualdev Inc."
+    -subj "/C=US/ST=NewYork/L=New York co/O=LKY Inc./CN=LKY Inc."
 fi
 keypair() {
   local NAME=$1
