@@ -15,6 +15,7 @@ YELLOW='\033[0;33m'
 # No Color
 NC='\033[0m'
 POOL_TEMPLATE="/opt/websitemanager/phpini-templates/php-fpm.conf"
+FRAMEWORK="default"
 HAS_POOL_TEMPLATE="1"
 USERNAME=""
 mysqlcred="/opt/websitemanager/mysql"
@@ -396,8 +397,7 @@ fi
 }
 
 function setupphpcli(){
-echo "$FRAMEWORK"
-if [ ! "$FRAMEWORK" == "node.conf" ];then
+if [ ! "$TEMPLATE" == "node.conf" ];then
 	echo-green "Setup default php cli version to php$PHP_VERSION"
 	update-alternatives --set php /usr/bin/php$PHP_VERSION > /dev/null 2>&1
 	echo-yellow "you can use following commond to set default php CLI version via terminal"
