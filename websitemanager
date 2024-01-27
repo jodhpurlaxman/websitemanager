@@ -501,6 +501,6 @@ websitemanager-point-ip;
 websitemanager-ssl-generate;
 websitemanager-enable-reload;
 mysqlcred;
-install_framework;
 setupphpcli;
+install_framework;
 exit 0
