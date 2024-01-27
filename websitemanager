@@ -396,6 +396,7 @@ fi
 }
 
 function setupphpcli(){
+echo "$FRAMEWORK"
 if [ "$FRAMEWORK" != "node.conf" ];then
 	echo-green "Setup default php cli version to php$PHP_VERSION"
 	update-alternatives --set php /usr/bin/php$PHP_VERSION > /dev/null 2>&1
