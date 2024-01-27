@@ -396,11 +396,12 @@ fi
 }
 
 function setupphpcli(){
-echo-green "Setup default php cli version to php$PHP_VERSION"
-update-alternatives --set php /usr/bin/php$PHP_VERSION > /dev/null 2>&1
-echo-yellow "you can use following commond to set default php CLI version via terminal"
-echo-red "sudo update-alternatives --set php /usr/bin/php8.2"
-
+if [ ! "$FRAMEWORK" == "node.conf" ];then
+	echo-green "Setup default php cli version to php$PHP_VERSION"
+	update-alternatives --set php /usr/bin/php$PHP_VERSION > /dev/null 2>&1
+	echo-yellow "you can use following commond to set default php CLI version via terminal"
+	echo-red "sudo update-alternatives --set php /usr/bin/php8.2"
+fi
 }
 
 verifyuserinput(){
