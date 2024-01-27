@@ -500,7 +500,7 @@ spacer
 }
 
 function installCAbrowsers(){
-  echo 'installing CUSTOM CA Cert'
+  echo-green 'installing CUSTOM CA Cert'
   if [ ! -d "/usr/local/share/ca-certificates" ];then
 	mkdir -p /usr/local/share/ca-certificates
   fi
