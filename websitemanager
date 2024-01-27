@@ -479,6 +479,7 @@ if [ "$FRAMEWORK" == "laravel" ]; then
 fi
 if [ "$FRAMEWORK" == "node" ]; then
     TEMPLATE="node.conf"
+fi
 if [ "$TEMPLATE" == "" ]; then
     echo "hi i  am $TEMPLATE"
     TEMPLATE="default.conf"
@@ -486,7 +487,6 @@ if [ "$TEMPLATE" == "" ]; then
 elif [ "$TEMPLATE" == "node.conf" ]; then
     HAS_POOL_TEMPLATE="0"
 fi
-
 if [ "$PORT" == "" ]; then
     PORT="3000"
 fi
