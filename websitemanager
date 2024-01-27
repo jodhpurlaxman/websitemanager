@@ -230,7 +230,6 @@ websitemanager-generate-vhost() {
     echo-green "Creating $DOMAIN virtual host."
     	
     APACHE_CONF="/etc/apache2/sites-available/$DOMAIN.conf"
-    echo "$DOCUMENT_ROOT"
     cp  $CONFDIR/vhosttemplates/$TEMPLATE $APACHE_CONF
     sed -i 's#user#'$username'#g' $APACHE_CONF
     sed -i 's#domain#'$DOMAIN'#g' $APACHE_CONF
@@ -247,7 +246,7 @@ websitemanager-generate-vhost() {
     fi
     	 
     if [ "$TEMPLATE" == "node.conf" ]; then
-    sed -i 's#port#'$PORT'#g' $APACHE_CONF
+    sed -i 's#localhost:port#'localhost:$PORT'#g' $APACHE_CONF
     else
     	sed -i 's#php_version#'$PHP_VERSION'#g' $APACHE_CONF
     fi
@@ -345,7 +344,8 @@ if [ -z "$DOCUMENT_ROOT" ]; then
  if [ -z "$(ls -A /home/$username/public_html/sites/$DOMAIN)" ]; then
     echo ""
  else
-    exit 1
+   echo-red "No framework specificed or directory not empty"
+   exit 1
  fi
  fi
 if [ "$FRAMEWORK" == "laravel" ]; then
