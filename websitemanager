@@ -339,15 +339,13 @@ websitemanager-enable-reload() {
 }
 
 install_framework(){
- if [ -z "$DOCUMENT_ROOT" ]; then
+if [ -z "$DOCUMENT_ROOT" ]; then
  if [ -z "$(ls -A /home/$username/public_html/sites/$DOMAIN)" ]; then
     echo ""
  else
-    echo-red "warning: document root directory is not empty, exiting installer"
     exit 1
  fi
  fi
-    
 if [ "$FRAMEWORK" == "laravel" ]; then
     echo-green "================================="
     echo-green "downloading and installing latest Laravel version"
