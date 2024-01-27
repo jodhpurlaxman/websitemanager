@@ -490,7 +490,6 @@ fi
 if [ "$PORT" == "" ]; then
     PORT="3000"
 fi
-fi
 #
 # Do vhost creation process
 #
