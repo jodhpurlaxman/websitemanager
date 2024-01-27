@@ -17,6 +17,7 @@ NC='\033[0m'
 POOL_TEMPLATE="/opt/websitemanager/phpini-templates/php-fpm.conf"
 HAS_POOL_TEMPLATE="1"
 USERNAME=""
+DOCUMENT_ROOT=
 mysqlcred="/opt/websitemanager/mysql"
 # ---------------------------------------------------------------------------- #
 # FUNCTIONS                                                                    #
@@ -336,7 +337,7 @@ websitemanager-enable-reload() {
 
 install_framework(){
 if [ -z "$DOCUMENT_ROOT" ]; then
- if [ -z "$(ls -A /home/$username/public_html/sites/$DOMAIN)" ]; then
+ if [ -z "$(ls -A $DOCUMENT_ROOT)" ]; then
     echo ""
  else
    echo-red "No framework specificed or directory not empty"
@@ -347,15 +348,15 @@ if [ "$FRAMEWORK" == "laravel" ]; then
     echo-green "================================="
     echo-green "downloading and installing latest Laravel version"
         export COMPOSER_ALLOW_SUPERUSER=1
- 	composer create-project laravel/laravel "/home/$username/public_html/sites/$DOMAIN"
-	chown -R $username:$username "/home/$username/public_html/sites/$DOMAIN"
+ 	composer create-project laravel/laravel "$DOCUMENT_ROOT"
+	chown -R $username:$username $DOCUMENT_ROOT
     temp_DB=${DOMAIN%.*}
     temp_DB==$(sed "s/-/_/g" <<< "$temp_DB")
     DB=${username}_${temp_DB} 
     sudo mysql -e "CREATE DATABASE $DB;"
-    sed -i 's/laravel/'$DB'/' /home/$username/public_html/sites/$DOMAIN/.env
-    sed -i 's/root/$mysqluser/' /home/$username/public_html/sites/$DOMAIN/.env
-    sed -i 's/DB_PASSWORD=/DB_PASSWORD=$mysqluserpasswd/' /home/$username/public_html/sites/$DOMAIN/.env
+    sed -i 's/laravel/'$DB'/' $DOCUMENT_ROOT/.env
+    sed -i 's/root/$mysqluser/' $DOCUMENT_ROOT/.env
+    sed -i 's/DB_PASSWORD=/DB_PASSWORD=$mysqluserpasswd/' $DOCUMENT_ROOT/.env
 
 elif [ "$FRAMEWORK" == "wordpress" ]; then
 	cd /tmp
@@ -367,11 +368,11 @@ elif [ "$FRAMEWORK" == "wordpress" ]; then
     #DB=$(echo ${username}'_'${temp_DB})
     DB=${username}_${temp_DB} 
     sudo mysql -e "CREATE DATABASE $DB;"
-    cp /home/$username/public_html/sites/$DOMAIN/wp-config-sample.php /home/$username/public_html/sites/$DOMAIN/wp-config.php
-    sed -i 's/database_name_here/'$DB'/' /home/$username/public_html/sites/$DOMAIN/wp-config.php
-    sed -i 's/username_here/$mysqluser/' /home/$username/public_html/sites/$DOMAIN/wp-config.php
-    sed -i 's/password_here/$mysqluserpasswd/' /home/$username/public_html/sites/$DOMAIN/wp-config.php
-    chown -R $username:$username "/home/$username/public_html/sites/$DOMAIN"
+    cp /home/$username/public_html/sites/$DOMAIN/wp-config-sample.php $DOCUMENT_ROOT/wp-config.php
+    sed -i 's/database_name_here/'$DB'/' $DOCUMENT_ROOT/wp-config.php
+    sed -i 's/username_here/$mysqluser/' $DOCUMENT_ROOT/wp-config.php
+    sed -i 's/password_here/$mysqluserpasswd/' $DOCUMENT_ROOT/wp-config.php
+    chown -R $username:$username "$DOCUMENT_ROOT"
 fi
 }
 function mysqlcred(){
@@ -411,7 +412,8 @@ else
 echo-green "Framework: $FRAMEWORK"
 fi
 if [ -z "$DOCUMENT_ROOT" ]; then
-echo-green "Document root: '/home/$username/public_html/sites/$DOMAIN'"
+DOCUMENT_ROOT = '/home/$username/public_html/sites/$DOMAIN'
+echo-green "Document root: '$DOCUMENT_ROOT'"
 else
     echo-yellow "Custom Document root: $DOCUMENT_ROOT"
 fi    
