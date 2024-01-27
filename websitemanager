@@ -404,7 +404,7 @@ echo-green "====================================================================
 echo-green
 echo-green "Username: $username";
 echo-green "Domain: $DOMAIN"
-echo-green "Template: $TEMPLATE"
+echo-green "VhostTemplate: $TEMPLATE"
 if [ -z "$FRAMEWORK"  ]; then
 echo-yellow "Framework: Not Defined"
 else
