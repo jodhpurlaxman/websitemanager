@@ -185,6 +185,7 @@ websitemanager-template() {
     websitemanager-verify-sudo;
     echo-green "Verifying template..."
 
+    echo "/opt/websitemanager/vhosttemplates/$TEMPLATE"
 
         if [ ! -f "/opt/websitemanager/vhosttemplates/$TEMPLATE" ]; then
             echo-red "$TEMPLATE not found!"
