@@ -347,27 +347,27 @@ if [ "$FRAMEWORK" == "laravel" ]; then
  	composer create-project laravel/laravel "$DOCUMENT_ROOT"
 	chown -R $username:$username $DOCUMENT_ROOT
     temp_DB=${DOMAIN%.*}
-    temp_DB==$(sed "s/-/_/g" <<< "$temp_DB")
+    temp_DB=$(sed "s/-/_/g" <<< "$temp_DB")
     DB=${username}_${temp_DB} 
     sudo mysql -e "CREATE DATABASE $DB;"
-    sed -i 's/laravel/'$DB'/' $DOCUMENT_ROOT/.env
-    sed -i 's/root/$mysqluser/' $DOCUMENT_ROOT/.env
-    sed -i 's/DB_PASSWORD=/DB_PASSWORD=$mysqluserpasswd/' $DOCUMENT_ROOT/.env
+    sed -i 's/laravel/"$DB"/' $DOCUMENT_ROOT/.env
+    sed -i 's/root/"$mysqluser"/' $DOCUMENT_ROOT/.env
+    sed -i 's/"DB_PASSWORD="/"DB_PASSWORD=$mysqluserpasswd"/' $DOCUMENT_ROOT/.env
 
 elif [ "$FRAMEWORK" == "wordpress" ]; then
 	cd /tmp
     echo-green "=================================="
 	echo-green "downloading and installing wordpress"	
-    curl https://wordpress.org/latest.tar.gz -o latest.tar.gz && tar -xzf latest.tar.gz -C "/home/$username/public_html/sites/$DOMAIN" --strip-components=1
+    curl https://wordpress.org/latest.tar.gz -o latest.tar.gz && tar -xzf latest.tar.gz -C "$DOCUMENT_ROOT" --strip-components=1
     
     temp_DB=${DOMAIN%.*}
     #DB=$(echo ${username}'_'${temp_DB})
     DB=${username}_${temp_DB} 
     sudo mysql -e "CREATE DATABASE $DB;"
     cp /home/$username/public_html/sites/$DOMAIN/wp-config-sample.php $DOCUMENT_ROOT/wp-config.php
-    sed -i 's/database_name_here/'$DB'/' $DOCUMENT_ROOT/wp-config.php
-    sed -i 's/username_here/$mysqluser/' $DOCUMENT_ROOT/wp-config.php
-    sed -i 's/password_here/$mysqluserpasswd/' $DOCUMENT_ROOT/wp-config.php
+    sed -i 's/database_name_here/"$DB"/' $DOCUMENT_ROOT/wp-config.php
+    sed -i 's/username_here/"$mysqluser"/' $DOCUMENT_ROOT/wp-config.php
+    sed -i 's/password_here/"$mysqluserpasswd"/' $DOCUMENT_ROOT/wp-config.php
     chown -R $username:$username "$DOCUMENT_ROOT"
 fi
 }
