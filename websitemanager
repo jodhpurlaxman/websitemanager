@@ -353,6 +353,7 @@ if [ "$FRAMEWORK" == "laravel" ]; then
     sed -i 's/laravel/"$DB"/' $DOCUMENT_ROOT/.env
     sed -i 's/root/"$mysqluser"/' $DOCUMENT_ROOT/.env
     sed -i 's/"DB_PASSWORD="/"DB_PASSWORD=$mysqluserpasswd"/' $DOCUMENT_ROOT/.env
+mysqlcred
 
 elif [ "$FRAMEWORK" == "wordpress" ]; then
 	cd /tmp
@@ -369,6 +370,8 @@ elif [ "$FRAMEWORK" == "wordpress" ]; then
     sed -i 's/username_here/"$mysqluser"/' $DOCUMENT_ROOT/wp-config.php
     sed -i 's/password_here/"$mysqluserpasswd"/' $DOCUMENT_ROOT/wp-config.php
     chown -R $username:$username "$DOCUMENT_ROOT"
+
+mysqlcred
 fi
 }
 function mysqlcred(){
@@ -501,7 +504,7 @@ websitemanager-generate-vhost;
 websitemanager-point-ip;
 websitemanager-ssl-generate;
 websitemanager-enable-reload;
-mysqlcred;
+#mysqlcred;
 setupphpcli;
 install_framework;
 exit 0
