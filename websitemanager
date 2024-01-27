@@ -449,9 +449,7 @@ while [ $1 ]; do
         '-t') TEMPLATE="$2.conf";;
 	'-f') FRAMEWORK="$2";;
         '-pv')
-            PHP_VERSION="$2"
-            HAS_POOL_TEMPLATE="1"
-            ;;
+            PHP_VERSION="$2";;
 	'-dr') DOCUMENT_ROOT="$2";;    
         '-p') PORT="$2";;    
         '-d') DOMAIN="$2";;
@@ -499,7 +497,7 @@ websitemanager-getusername;
 verifyuserinput;
 websitemanager-template;
 websitemanager-generate-vhost;
-websitemanager-generate-pool;
+#websitemanager-generate-pool;
 websitemanager-point-ip;
 websitemanager-ssl-generate;
 websitemanager-enable-reload;
