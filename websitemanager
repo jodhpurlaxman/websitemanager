@@ -397,8 +397,7 @@ fi
 
 function setupphpcli(){
 echo-green "Setup default php cli version to 8.1"
-update-alternatives --set php /usr/bin/$PHP_VERSION > /dev/null 2>&1
-echo-green "set $PHP_VERSION as a default php version"
+update-alternatives --set php /usr/bin/php$PHP_VERSION > /dev/null 2>&1
 echo-yellow "you can use following commond to set default php CLI version via terminal"
 echo-red "sudo update-alternatives --set php /usr/bin/php8.2"
 
