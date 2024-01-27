@@ -482,7 +482,6 @@ if [ "$FRAMEWORK" == "node" ]; then
     TEMPLATE="node.conf"
 fi
 if [ "$TEMPLATE" == "" ]; then
-    echo "hi i  am $TEMPLATE"
     TEMPLATE="default.conf"
     HAS_POOL_TEMPLATE="1"
 elif [ "$TEMPLATE" == "node.conf" ]; then
