@@ -476,6 +476,9 @@ fi
 
 if [ "$TEMPLATE" == "" ]; then
     TEMPLATE="default.conf"
+    HAS_POOL_TEMPLATE=1
+elif [ "$TEMPLATE" == "node.conf" ]; then
+    HAS_POOL_TEMPLATE=0
 fi
 if [ "$FRAMEWORK" == "laravel" ]; then
     TEMPLATE="laravel.conf"
