@@ -15,7 +15,7 @@ YELLOW='\033[0;33m'
 # No Color
 NC='\033[0m'
 POOL_TEMPLATE="/opt/websitemanager/phpini-templates/php-fpm.conf"
-HAS_POOL_TEMPLATE="0"
+HAS_POOL_TEMPLATE="1"
 USERNAME=""
 mysqlcred="/opt/websitemanager/mysql"
 # ---------------------------------------------------------------------------- #
@@ -449,7 +449,6 @@ while [ $1 ]; do
 	'-f') FRAMEWORK="$2";;
         '-pv')
             PHP_VERSION="$2"
-            HAS_POOL_TEMPLATE="1"
             ;;
 	'-dr') DOCUMENT_ROOT="$2";;    
         '-p') PORT="$2";;    
@@ -474,17 +473,18 @@ if [ "$PHP_VERSION" == "" ]; then
     PHP_VERSION="8.0"
 fi
 
-if [ "$TEMPLATE" == "" ]; then
-    TEMPLATE="default.conf"
-    HAS_POOL_TEMPLATE="1"
-elif [ "$TEMPLATE" == "node.conf" ]; then
-    HAS_POOL_TEMPLATE=0
-fi
 if [ "$FRAMEWORK" == "laravel" ]; then
     TEMPLATE="laravel.conf"
 fi
 if [ "$FRAMEWORK" == "node" ]; then
     TEMPLATE="node.conf"
+if [ "$TEMPLATE" == "" ]; then
+    TEMPLATE="default.conf"
+    HAS_POOL_TEMPLATE="1"
+elif [ "$TEMPLATE" == "node.conf" ]; then
+    HAS_POOL_TEMPLATE="0"
+fi
+
 if [ "$PORT" == "" ]; then
     PORT="3000"
 fi
