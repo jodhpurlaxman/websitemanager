@@ -450,6 +450,7 @@ while [ $1 ]; do
 	'-f') FRAMEWORK="$2";;
         '-pv')
             PHP_VERSION="$2"
+            HAS_POOL_TEMPLATE="1"
             ;;
 	'-dr') DOCUMENT_ROOT="$2";;    
         '-p') PORT="$2";;    
