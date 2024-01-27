@@ -246,7 +246,7 @@ websitemanager-generate-vhost() {
     	sed -i 's#php_version#'$PHP_VERSION'#g' $APACHE_CONF
     fi
 
-    if [ $HAS_POOL_TEMPLATE = "1" ]; then
+    if [ $HAS_POOL_TEMPLATE == "1" ]; then
         websitemanager-generate-pool;
     fi
 
@@ -418,7 +418,7 @@ fi
 if [ "$Framework" == 'node' ]; then
 echo-green "Port: $PORT" 
 fi
-if [ ! "$Framework" == 'node' ]; then
+if [ "$Framework" != 'node' ]; then
 echo-green "Php_Version: $PHP_VERSION"
 fi
 
