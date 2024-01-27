@@ -15,7 +15,6 @@ YELLOW='\033[0;33m'
 # No Color
 NC='\033[0m'
 POOL_TEMPLATE="/opt/websitemanager/phpini-templates/php-fpm.conf"
-FRAMEWORK="NA"
 HAS_POOL_TEMPLATE="1"
 USERNAME=""
 mysqlcred="/opt/websitemanager/mysql"
@@ -422,9 +421,12 @@ else
     echo-yellow "Custom Document root: $DOCUMENT_ROOT"
 fi    
 if [ "$Framework" == 'node' ]; then
-echo-green "Port: $PORT"  # this will work if template is node
+echo-green "Port: $PORT" 
 fi
+if [ ! "$Framework" == 'node' ]; then
 echo-green "Php_Version: $PHP_VERSION"
+fi
+
 echo-green
 echo-green "=============================================================================="
 echo-green
