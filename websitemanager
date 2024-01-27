@@ -406,7 +406,7 @@ echo-green "Username: $username";
 echo-green "Domain: $DOMAIN"
 echo-green "Template: $TEMPLATE"
 if [ -z "$FRAMEWORK"  ]; then
-echo-green "Framework: Not Defined"
+echo-yellow "Framework: Not Defined"
 else
 echo-green "Framework: $FRAMEWORK"
 fi
@@ -415,12 +415,12 @@ echo-green "Document root: '/home/$username/public_html/sites/$DOMAIN'"
 else
     echo-yellow "Custom Document root: $DOCUMENT_ROOT"
 fi    
-if [ "$TEMPLATE" == 'node' ]; then
-echo-green "Port: $PORT" 
+if [ "$TEMPLATE" == 'node.conf' ]; then
+    echo-green "Port: $PORT"
+else
+    echo-green "Php_Version: $PHP_VERSION"
 fi
-if [ "$TEMPLATE" != 'node' ]; then
-echo-green "Php_Version: $PHP_VERSION"
-fi
+
 
 echo-green
 echo-green "=============================================================================="
