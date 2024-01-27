@@ -154,8 +154,6 @@ websitemanager-update() {
         echo-green "Update complete!"
         echo-red "Please re-run same command"
         exit 0
-    else
-        echo-green "Local repo is already updated!"
     fi
 }
 
@@ -216,10 +214,7 @@ sudoers_user() {
 websitemanager-verify-sudo;
 if ! grep -q "$(logname)" /etc/sudoers; then
     echo "$(logname) ALL = NOPASSWD: /bin/systemctl restart apache2.service, /usr/bin/websitemanager, /usr/bin/systemmanager,/usr/bin/internet /bin/kill" >> /etc/sudoers
-    
-else
-    echo-green "user account already exists in sudoers";
-fi
+
 }
 
 #
