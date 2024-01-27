@@ -229,7 +229,7 @@ websitemanager-generate-vhost() {
     echo-green "Creating $DOMAIN virtual host."
     	
     APACHE_CONF="/etc/apache2/sites-available/$DOMAIN.conf"
-
+    echo "$DOCUMENT_ROOT"
     cp  $CONFDIR/vhosttemplates/$TEMPLATE $APACHE_CONF
     sed -i 's#user#'$username'#g' $APACHE_CONF
     sed -i 's#domain#'$DOMAIN'#g' $APACHE_CONF
@@ -238,7 +238,7 @@ websitemanager-generate-vhost() {
     mkdir -p /home/$username/public_html/logs/$DOMAIN
     chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
     chown -R $username:$username /home/$username/public_html/sites/$DOMAIN
-    echo 'sed -i "s+/home/$username/public_html/sites/$DOMAIN+$DOCUMENT_ROOT+g" $APACHE_CONF'
+    echo 'sed -i s+/home/$username/public_html/sites/$DOMAIN+$DOCUMENT_ROOT+g $APACHE_CONF'
     echo "if"
     exit 1
     else
