@@ -397,7 +397,7 @@ fi
 
 function setupphpcli(){
 echo "$FRAMEWORK"
-if [ ! "$FRAMEWORK" = "node.conf" ];then
+if [ ! "$FRAMEWORK" == "node.conf" ];then
 	echo-green "Setup default php cli version to php$PHP_VERSION"
 	update-alternatives --set php /usr/bin/php$PHP_VERSION > /dev/null 2>&1
 	echo-yellow "you can use following commond to set default php CLI version via terminal"
@@ -478,18 +478,23 @@ fi
 if [ "$FRAMEWORK" == "laravel" ]; then
     TEMPLATE="laravel.conf"
 fi
+
 if [ "$FRAMEWORK" == "node" ]; then
     TEMPLATE="node.conf"
 fi
+
 if [ "$TEMPLATE" == "" ]; then
     TEMPLATE="default.conf"
     HAS_POOL_TEMPLATE="1"
 elif [ "$TEMPLATE" == "node.conf" ]; then
     HAS_POOL_TEMPLATE="0"
 fi
+
 if [ "$PORT" == "" ]; then
     PORT="3000"
 fi
+echo "lky$FRAMEWORK"
+
 #
 # Do vhost creation process
 #
