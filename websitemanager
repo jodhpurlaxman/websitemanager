@@ -238,8 +238,14 @@ websitemanager-generate-vhost() {
     mkdir -p /home/$username/public_html/logs/$DOMAIN
     chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
     chown -R $username:$username /home/$username/public_html/sites/$DOMAIN
+    echo 'sed -i "s+/home/$username/public_html/sites/$DOMAIN+$DOCUMENT_ROOT+g" $APACHE_CONF'
+    echo "if"
+    exit 1
     else
-        sed -i "s+/home/user/public_html/sites/domain+$DOCUMENT_ROOT+g" $APACHE_CONF
+        
+        echo 'sed -i "s+/home/$username/public_html/sites/$DOMAIN+$DOCUMENT_ROOT+g" $APACHE_CONF'
+        echo "else"
+        exit 1
     	mkdir -p /home/$username/public_html/logs/$DOMAIN
 	chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
     fi
