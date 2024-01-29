@@ -434,7 +434,7 @@ if [ "$TEMPLATE" == 'node.conf' ]; then
 else
     echo-green "Php_Version: $PHP_VERSION"
 fi
-}
+
 
 echo-green
 echo-green "=============================================================================="
