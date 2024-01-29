@@ -513,6 +513,10 @@ function installCAbrowsers(){
   fi
 
 }
+function installNode(){
+for userlist in "/home/*";do
+su userlist && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash 
+}
 
 function spacer(){
 echo "============================================================================================================="
@@ -570,6 +574,8 @@ installCAbrowsers
 chrome-browser
 #echo-green "Executing Func. vscode"
 vscode
+spacer
+installNode
 spacer
 setupphpcli
 success
