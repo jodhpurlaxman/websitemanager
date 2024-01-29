@@ -474,18 +474,21 @@ if [ "$PHP_VERSION" == "" ]; then
 fi
 
 if [ "$FRAMEWORK" == "laravel" ]; then
-    TEMPLATE="laravel.conf"
+    TEMPLATE="laravel"
+    HAS_POOL_TEMPLATE="1"
+elif [ "$FRAMEWORK" == "wordpress" ]; then
+    TEMPLATE="wordpress"
+    HAS_POOL_TEMPLATE="1"
 fi
 
-if [ "$FRAMEWORK" == "node" ]; then
-    TEMPLATE="node.conf"
-fi
 
 if [ "$TEMPLATE" == "" ]; then
     TEMPLATE="default.conf"
     HAS_POOL_TEMPLATE="1"
 elif [ "$TEMPLATE" == "node.conf" ]; then
     HAS_POOL_TEMPLATE="0"
+elif [ "$TEMPLATE" == "laravel.conf" ]; then
+    HAS_POOL_TEMPLATE="1"
 fi
 
 if [ "$PORT" == "" ]; then
@@ -494,6 +497,7 @@ fi
 #
 # Do vhost creation process
 #
+echo-green "$HAS_POOL_TEMPLATE"
 websitemanager-update;
 sudoers_user;
 websitemanager-getusername;
