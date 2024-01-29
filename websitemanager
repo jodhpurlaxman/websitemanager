@@ -395,11 +395,10 @@ function savedomainslist(){
 	if [ ! -f ${domainslist} ]; then
                 touch ${domainslist} 
                 #save domains in file for further uses
-	elif  [ grep -n "$DOMAIN" ${domainslist} | cut -d: -f1 != "" ]
+	elif  [ grep -n "$DOMAIN" ${domainslist} | cut -d: -f1 != "" ];then
                echo -e "${DOMAIN}|${$PHP_VERSION}" > ${domains}
         else 
               sed -i 's/^${DOMAIN}|7.0/test-123.com|${$PHP_VERSION}/g' ${DOMAIN} //need to review part
-        fi
         fi
 }
 
