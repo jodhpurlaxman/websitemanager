@@ -226,15 +226,14 @@ websitemanager-generate-vhost() {
     sed -i 's#user#'$username'#g' $APACHE_CONF
     sed -i 's#domain#'$DOMAIN'#g' $APACHE_CONF
     if [ -z "$DOCUMENT_ROOT" ]; then
-    mkdir -p /home/$username/public_html/sites/$DOMAIN/
-    mkdir -p /home/$username/public_html/logs/$DOMAIN
-    chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
-    chown -R $username:$username /home/$username/public_html/sites/$DOMAIN
+	    mkdir -p /home/$username/public_html/sites/$DOMAIN/
+	    mkdir -p /home/$username/public_html/logs/$DOMAIN
+	    chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
+	    chown -R $username:$username /home/$username/public_html/sites/$DOMAIN
     else
-        
-        sed -i "s+/home/$username/public_html/sites/$DOMAIN+$DOCUMENT_ROOT+g" $APACHE_CONF
-    	mkdir -p /home/$username/public_html/logs/$DOMAIN
-	chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
+	        sed -i "s+/home/$username/public_html/sites/$DOMAIN+$DOCUMENT_ROOT+g" $APACHE_CONF
+	    	mkdir -p /home/$username/public_html/logs/$DOMAIN
+		chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
     fi
     	 
     if [ "$TEMPLATE" == "node.conf" ]; then
@@ -243,7 +242,8 @@ websitemanager-generate-vhost() {
     	sed -i 's#php_version#'$PHP_VERSION'#g' $APACHE_CONF
     fi
 
-    if [ $HAS_POOL_TEMPLATE == "1" ]; then
+    if [ $HAS_POOL_TEMPLATE == "1" ];then
+        echo-red "HAS_POOL_TEMPLATE"
         websitemanager-generate-pool;
     fi
 
