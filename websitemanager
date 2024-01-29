@@ -18,6 +18,7 @@ POOL_TEMPLATE="/opt/websitemanager/phpini-templates/php-fpm.conf"
 HAS_POOL_TEMPLATE="1"
 USERNAME=""
 mysqlcred="/opt/websitemanager/mysql"
+domainslist="/opt/websitemanager/domainlist"
 # ---------------------------------------------------------------------------- #
 # FUNCTIONS                                                                    #
 # ---------------------------------------------------------------------------- #
@@ -226,8 +227,6 @@ websitemanager-generate-vhost() {
     
     sed -i 's#user#'$username'#g' $APACHE_CONF
     sed -i 's#domain#'$DOMAIN'#g' $APACHE_CONF
-    echo-red $DOCUMENT_ROOT
-    
 
    if [ -z "$DOCUMENT_ROOT" ]; then
 	    mkdir -p /home/$username/public_html/sites/$DOMAIN/
@@ -247,7 +246,6 @@ websitemanager-generate-vhost() {
     fi
 
     if [ $HAS_POOL_TEMPLATE == "1" ];then
-        echo-red "HAS_POOL_TEMPLATE"
         websitemanager-generate-php-pool;
     fi
 
@@ -393,6 +391,17 @@ function mysqlcred(){
 	    mysqluserpasswd=$(tail -n 1 ${mysqlcred})
 fi
 }
+function savedomainslist(){
+	if [ ! -f ${domainslist} ]; then
+                touch ${domainslist} 
+                #save domains in file for further uses
+	elif  [ grep -n "$DOMAIN" ${domainslist} | cut -d: -f1 != "" ]
+               echo -e "${DOMAIN}|${$PHP_VERSION}" > ${domains}
+        else 
+              sed -i 's/^${DOMAIN}|7.0/test-123.com|${$PHP_VERSION}/g' ${DOMAIN} //need to review part
+        fi
+        fi
+}
 
 function setupphpcli(){
 if [ ! "$TEMPLATE" == "node.conf" ];then
@@ -402,6 +411,7 @@ if [ ! "$TEMPLATE" == "node.conf" ];then
 	echo-red "sudo update-alternatives --set php /usr/bin/php8.2"
 fi
 }
+
 
 verifyuserinput(){
 echo-green "=============================================================================="
@@ -425,7 +435,7 @@ if [ "$TEMPLATE" == 'node.conf' ]; then
 else
     echo-green "Php_Version: $PHP_VERSION"
 fi
-
+}
 
 echo-green
 echo-green "=============================================================================="
