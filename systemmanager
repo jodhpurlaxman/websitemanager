@@ -117,7 +117,7 @@ load-dialog () {
                 6 "Php7.2" $onoff
                 7 "Php7.3" $onoff
                 8 "Php7.4" on
-                9 "Php8.0" on
+                9 "Php8.0 required for phpnyadmin" on
                 10 "Php8.1" on
                 11 "Php8.2" on
                 12 "Php8.3" on
