@@ -79,15 +79,19 @@ systemmanager-install() {
         echo "ALL ALL = NOPASSWD: /usr/bin/cat, /usr/bin/update-alternatives, /usr/bin/websitemanager, /usr/bin/systemmanager, /bin/systemctl restart apache2, /bin/kill" >> /etc/sudoers
     fi
     cd /opt/websitemanager
-    git checkout .
+    #git checkout .
     git remote update > /dev/null
     needUpdate=$(git status -uno | grep -c "git pull")
 
     if [ "$needUpdate" -ne 0 ]; then
-        echo-yellow "Need update..."
-        git reset --hard origin/master > /dev/null
-        echo-green "Update complete!"
-        sudo systemmanager
+        echo-yellow "there are some updates, would you like to update systemamanger y/n"
+        read updates
+        if [ "$updates" = "y" ];then
+           git reset --hard origin/master > /dev/null
+           echo-green "Update complete!"
+           exit 1 && sudo systemmanager
+        fi
+       
     fi
     echo
     echo
