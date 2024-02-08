@@ -15,7 +15,7 @@ NC='\033[0m'
 CONFDIR="/opt/websitemanager"
 mysqlcred="/opt/websitemanager/mysql"
 requiredpkg="unzip git build-essential ca-certificates libnss3-tools libtool autoconf software-properties-common curl wget gcc g++ make dirmngr apt-transport-https dialog libnss3-tools"
-commonpkg="git filezilla cifs-utils resolvconf openssh-server"
+commonpkg="filezilla cifs-utils resolvconf openssh-server"
 databasepkg="mariadb-client mariadb-server"
 apache="apache2 apache2-utils libapache2-mpm-itk openssl"
 php70="php7.0-fpm php7.0-curl php7.0-common php7.0-bcmath php7.0-bz2 php7.0-intl php7.0-gd php7.0-mbstring php7.0-mysql php7.0-zip php7.0-json php7.0-xml"
@@ -121,13 +121,13 @@ load-dialog () {
     options=(
                 1 "Essentials" on
                 2 "Database" on
-                3 "Apache" on
+                3 "Apache required for phpmyadmin" on
                 4 "Php7.0" $onoff
                 5 "Php7.1" $onoff
                 6 "Php7.2" $onoff
                 7 "Php7.3" $onoff
                 8 "Php7.4" on
-                9 "Php8.0 required for phpnyadmin" on
+                9 "Php8.0 required for phpmyadmin" on
                 10 "Php8.1" on
                 11 "Php8.2" on
                 12 "Php8.3" on
