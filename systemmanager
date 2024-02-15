@@ -93,11 +93,6 @@ systemmanager-install() {
         fi
        
     fi
-    echo
-    echo
-    echo-green "Script installed! use: sudo systemmanager and sudo websitemanager"
-    echo
-    echo
 }
 
 function mysqlcred(){
