@@ -482,6 +482,7 @@ do
    systemctl daemon-reload
    systemctl enable  $service > /dev/null 2>&1
    systemctl start $service > /dev/null 2>&1
+   systemctl restart $service > /dev/null 2>&1
             
   fi
 done
