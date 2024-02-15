@@ -421,11 +421,21 @@ function composer(){
     echo-green "Installling composer"
     sudo sh -c "echo 'precedence ::ffff:0:0/96 100' >> /etc/gai.conf"
     rm -rf /usr/local/bin/composer && rm -rf /usr/bin/composer
+    EXPECTED_SIGNATURE="$(wget -q -O - https://composer.github.io/installer.sig)"
     php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-    php -r "if (hash_file('sha384', 'composer-setup.php') === 'e21205b207c3ff031906575712edab6f13eb0b361f2085f1f1237b7126d785e826a450292b6cfd1d64d92e6563bbde02') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-    php composer-setup.php
-    php -r "unlink('composer-setup.php');"
-    sudo mv composer.phar /usr/bin/composer
+    ACTUAL_SIGNATURE="$(php -r "echo hash_file('SHA384', 'composer-setup.php');")"
+
+    if [ "$EXPECTED_SIGNATURE" != "$ACTUAL_SIGNATURE" ]
+    then
+        >&2 echo-red 'ERROR: Invalid installer signature'
+    fi
+
+    php composer-setup.php --quiet
+    #RESULT=$?
+    rm composer-setup.php
+    mv composer.phar /usr/bin/composer
+    #exit $RESULT
+    
 }
 function dnssetup(){
     echo-red "Setup CustomDNS"
@@ -439,7 +449,7 @@ function dnssetup(){
 	    touch  /etc/resolv.conf
 	    echo-yellow "DNS1"
 	    read DNS1
-	    echo "nameserver 192.168.0.3" > /etc/resolv.conf
+	    echo "nameserver 192.168.0.7" > /etc/resolv.conf
 	    echo-yellow "DNS2"
 	    read DNS2
 	    echo "nameserver 1.1.1.1" >> /etc/resolv.conf
@@ -505,11 +515,8 @@ function vscode(){
 }
 function setupphpcli(){
 spacer
-echo-green "Setup default php cli version to 8.1"
+echo-green "Setup default php cli version to 8.0"
 update-alternatives --set php /usr/bin/php8.0 > /dev/null 2>&1
-echo-green "set php8.1 as a default php version"
-echo-yellow "you can use following commond to set default php CLI version"
-echo-red "sudo update-alternatives --set php /usr/bin/php8.2"
 spacer
 }
 
@@ -520,17 +527,8 @@ function installCAbrowsers(){
   fi
   if [ ! -f "/usr/local/share/ca-certificates/local-ca.crt" ];then
     cp $CONFDIR/openssl/ca-bundle.pem /usr/local/share/ca-certificates/local-ca.crt && update-ca-certificates
-    #
-    for userlist in "/home/*";do 
-    certutil -d sql:$userlist/.pki/nssdb -A -t "TC,," -n "LKY CA" -i /usr/local/share/ca-certificates/local-ca.crt
-   done
   fi
 
-}
-function installNVM(){
-for userlist in "/home/*";do
-su userlist && echo-green "installing NVM for user $userlist" && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-done
 }
 
 function spacer(){
@@ -589,8 +587,6 @@ installCAbrowsers
 chrome-browser
 #echo-green "Executing Func. vscode"
 vscode
-spacer
-installNVM
 spacer
 setupphpcli
 success
