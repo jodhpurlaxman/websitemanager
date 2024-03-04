@@ -218,7 +218,7 @@ fi
 #
 # Creates a new vhost in sites available of apache
 #
-websitemanager-generate-vhost() {
+websitemanager-generate-vhost() {$DOCUMENT_ROOT
     websitemanager-verify-sudo;
     echo-green "Creating $DOMAIN virtual host."
     	
@@ -231,13 +231,15 @@ websitemanager-generate-vhost() {
    if [ -z "$DOCUMENT_ROOT" ]; then
 	    mkdir -p /home/$username/public_html/sites/$DOMAIN/
 	    mkdir -p /home/$username/public_html/logs/$DOMAIN
-echo "checking permission issue"
             touch /home/$username/public_html/logs/$DOMAIN/{access.log,error.log}
 	    chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
 	    chown -R $username:$username /home/$username/public_html/sites/$DOMAIN
     else
 	        sed -i "s+/home/$username/public_html/sites/$DOMAIN+$DOCUMENT_ROOT+g" $APACHE_CONF
 	    	mkdir -p $DOCUMENT_ROOT
+		chown -R $username:$username $DOCUMENT_ROOT
+		mkdir -p /home/$username/public_html/logs/$DOMAIN
+		touch /home/$username/public_html/logs/$DOMAIN/{access.log,error.log}
 		chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
     fi
     	 
