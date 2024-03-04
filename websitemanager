@@ -426,8 +426,8 @@ else
 echo-green "Framework: $FRAMEWORK"
 fi
 if [ -z "$DOCUMENT_ROOT" ]; then
-DOCUMENT_ROOT="/home/$username/public_html/sites/$DOMAIN"
-echo-green "Document root: $DOCUMENT_ROOT"
+#DOCUMENT_ROOT="/home/$username/public_html/sites/$DOMAIN"
+echo-green "Document root:/home/$username/public_html/sites/$DOMAIN"
 else
     echo-yellow "Custom Document root: $DOCUMENT_ROOT"
 fi    
