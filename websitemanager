@@ -231,6 +231,8 @@ websitemanager-generate-vhost() {
    if [ -z "$DOCUMENT_ROOT" ]; then
 	    mkdir -p /home/$username/public_html/sites/$DOMAIN/
 	    mkdir -p /home/$username/public_html/logs/$DOMAIN
+echo "checking permission issue"
+            touch /home/$username/public_html/logs/$DOMAIN/{access.log,error.log}
 	    chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
 	    chown -R $username:$username /home/$username/public_html/sites/$DOMAIN
     else
