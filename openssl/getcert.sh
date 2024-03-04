@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 #
 # Generate a set of TLS credentials that can be used to run development mode.
 # Author Laxman singh jodhpur.laxman@gmail.com
