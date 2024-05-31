@@ -208,12 +208,12 @@ else
 fi
 }
 
-sudoers_user() {
+#sudoers_user() {
 #websitemanager-verify-sudo;
-if ! grep -q "$(logname)" /etc/sudoers; then
+#if ! grep -q "$(logname)" /etc/sudoers; then
     echo "$(username) ALL = NOPASSWD: /bin/systemctl restart apache2.service, /usr/bin/websitemanager, /usr/bin/systemmanager, /bin/kill" >> /etc/sudoers
-fi
-}
+#fi
+#}
 
 #
 # Creates a new vhost in sites available of apache
@@ -516,7 +516,7 @@ fi
 #
 echo-green "$HAS_POOL_TEMPLATE"
 websitemanager-update;
-sudoers_user;
+#sudoers_user;
 websitemanager-getusername;
 verifyuserinput;
 websitemanager-template;
