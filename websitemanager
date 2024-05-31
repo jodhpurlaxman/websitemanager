@@ -491,7 +491,11 @@ if [ "$PHP_VERSION" == "" ]; then
     PHP_VERSION="8.0"
 fi
 if [ "$DOCUMENT_ROOT" == "" ]; then
-    DOCUMENT_ROOT="/home/$username/public_html/sites/$DOMAIN"
+    DOCUMENT_ROOT="/home/$USERNAME/public_html/sites/$DOMAIN"
+else
+     DOCUMENT_ROOT=$DOCUMENT_ROOT
+    
+
 fi
 
 if [ "$FRAMEWORK" == "laravel" ]; then
