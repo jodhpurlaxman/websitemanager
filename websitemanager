@@ -338,6 +338,7 @@ websitemanager-enable-reload() {
 }
 
 install_framework(){
+echo "document root is $DOCUMENT_ROOT"
 if [ -z "$DOCUMENT_ROOT" ]; then
  if [ -z "$(ls -A $DOCUMENT_ROOT)" ]; then
     echo ""
