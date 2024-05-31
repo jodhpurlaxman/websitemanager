@@ -369,7 +369,7 @@ elif [ "$FRAMEWORK" == "wordpress" ]; then
     curl https://wordpress.org/latest.tar.gz -o latest.tar.gz && tar -xzf latest.tar.gz -C "$DOCUMENT_ROOT" --strip-components=1
     
     temp_DB=${DOMAIN%.*}
-    #DB=$(echo ${username}'_'${temp_DB})
+    temp_DB=$(sed "s/-/_/g" <<< "$temp_DB")
     DB=${username}_${temp_DB} 
     sudo mysql -e "CREATE DATABASE $DB;"
     cp /home/$username/public_html/sites/$DOMAIN/wp-config-sample.php $DOCUMENT_ROOT/wp-config.php
