@@ -211,7 +211,7 @@ fi
 #sudoers_user() {
 #websitemanager-verify-sudo;
 #if ! grep -q "$(logname)" /etc/sudoers; then
-    echo "$(username) ALL = NOPASSWD: /bin/systemctl restart apache2.service, /usr/bin/websitemanager, /usr/bin/systemmanager, /bin/kill" >> /etc/sudoers
+#    echo "$(username) ALL = NOPASSWD: /bin/systemctl restart apache2.service, /usr/bin/websitemanager, /usr/bin/systemmanager, /bin/kill" >> /etc/sudoers
 #fi
 #}
 
