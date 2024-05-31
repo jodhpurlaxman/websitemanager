@@ -375,10 +375,10 @@ elif [ "$FRAMEWORK" == "wordpress" ]; then
     DB=${username}_${temp_DB} 
     echo "creating Database for site $DB"  
     sudo mysql -e "CREATE DATABASE $DB;"
-    cp /home/$username/public_html/sites/$DOMAIN/wp-config-sample.php $DOCUMENT_ROOT/wp-config.php
-    sed -i 's/database_name_here/"$DB"/' $DOCUMENT_ROOT/wp-config.php
-    sed -i 's/username_here/"$mysqluser"/' $DOCUMENT_ROOT/wp-config.php
-    sed -i 's/password_here/"$mysqluserpasswd"/' $DOCUMENT_ROOT/wp-config.php
+    cp $DOCUMENT_ROOT/wp-config-sample.php $DOCUMENT_ROOT/wp-config.php
+    sed -i 's/database_name_here/$DB/' $DOCUMENT_ROOT/wp-config.php
+    sed -i 's/username_here/$mysqluser/' $DOCUMENT_ROOT/wp-config.php
+    sed -i 's/password_here/$mysqluserpasswd/' $DOCUMENT_ROOT/wp-config.php
     chown -R $username:$username "$DOCUMENT_ROOT"
 
 mysqlcred
