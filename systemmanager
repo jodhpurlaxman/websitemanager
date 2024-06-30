@@ -13,7 +13,9 @@ YELLOW='\033[0;33m'
 # No Color
 NC='\033[0m'
 CONFDIR="/opt/websitemanager"
-mysqlcred="/opt/websitemanager/mysql"
+STATUS="$CONFDIR/status" 
+VERSION="1.4.0"
+mysqlcred="$CONFDIR/mysql"
 requiredpkg="unzip git build-essential ca-certificates libnss3-tools libtool autoconf software-properties-common curl wget gcc g++ make dirmngr apt-transport-https dialog libnss3-tools"
 commonpkg="filezilla cifs-utils resolvconf openssh-server"
 databasepkg="mariadb-client mariadb-server"
@@ -64,34 +66,6 @@ systemmanager-verify-sudo() {
       then echo-red "Please execute as root eg: sudo"
       echo-red "else contact server administrator"	    
       exit 1
-    fi
-
-}
-
-systemmanager-install() {
-    systemmanager-verify-sudo;
-
-    if [ ! -e  "$CONFDIR" ]; then
-        mkdir "$CONFDIR"
-    fi
-    grep -q "ALL ALL = NOPASSWD: /usr/bin/cat, /usr/bin/update-alternatives, /usr/bin/websitemanager, /usr/bin/systemmanager, /bin/systemctl restart apache2, /bin/kill" /etc/sudoers
-    if [[ $? != 0 ]] ; then
-        echo "ALL ALL = NOPASSWD: /usr/bin/cat, /usr/bin/update-alternatives, /usr/bin/websitemanager, /usr/bin/systemmanager, /bin/systemctl restart apache2, /bin/kill" >> /etc/sudoers
-    fi
-    cd /opt/websitemanager
-    #git checkout .
-    git remote update > /dev/null
-    needUpdate=$(git status -uno | grep -c "git pull")
-
-    if [ "$needUpdate" -ne 0 ]; then
-        echo-yellow "there are some updates, would you like to update systemamanger y/n"
-        read updates
-        if [ "$updates" = "y" ];then
-           git reset --hard origin/master > /dev/null
-           echo-green "Update complete!"
-           exit 1 && sudo systemmanager
-        fi
-       
     fi
 }
 
@@ -223,8 +197,9 @@ mariarepo(){
         if [ ! -z "$mariadbupdate" ];then
            echo-green "Upgrading database to Mariadb-server-10.$dbv"        
         fi 
+    echo-yellow "Fetching Latest Mariadb Script"
     curl -LsS https://r.mariadb.com/downloads/mariadb_repo_setup | sudo bash -s -- --mariadb-server-version="mariadb-10.$dbv" > /dev/null 2>&1
-    
+    echo-green "done"
     fi
 }
 function mariaupdate(){
@@ -257,13 +232,15 @@ function rmdb(){
     fi    
 }
 function apacherepo(){
-        add-apt-repository ppa:ondrej/apache2 -y > /dev/null 2>&1
-        add-apt-repository ppa:ondrej/php -y > /dev/null 2>&1
+        echo-green "setup Apache Repo "
+        add-apt-repository ppa:ondrej/apache2 -y #> /dev/null 2>&1
+        add-apt-repository ppa:ondrej/php -y #> /dev/null 2>&1
+        echo-green "setup Apache Repo done"
 }
 function apacheconfig(){
     if [[ -z $Apache ]];then
         grep -q "/home/*/public_html" "/etc/apache2/apache2.conf" 
-        if [[ $? != 0 ]] ; then
+        if [[ $? = 0 ]] ; then
 sed -i '/#<Directory/i \
 <Directory /home/*/public_html/> \
 Options Indexes FollowSymLinks \
@@ -282,7 +259,7 @@ for i in 7.0 7.1 7.2 7.3 7.4 8.0 8.1 8.2 8.3
        if [ -d "/etc/php/$i/fpm" ]; then
             #echo-red "/etc/php/$i/fpm"       
             cp $CONFDIR/phpini-templates/php$i.conf /etc/php/$i/fpm/php.ini
-            rm -f /etc/php/$i/fpm/pool.d/www.conf
+            #rm -f /etc/php/$i/fpm/pool.d/www.conf
         fi
         
     done
@@ -292,7 +269,8 @@ function updatewpcli(){
     if [ ! -f "/usr/local/bin/wp" ]; then
     rm -f /usr/local/bin/wp
     git config --global --unset-all remote.origin.proxy
-    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar > /dev/null 2>&1
+    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar 
+    #> /dev/null 2>&1
     chmod +x wp-cli.phar
     mv wp-cli.phar '/usr/local/bin/wp'
     fi    
@@ -311,7 +289,7 @@ function phpmyadmin(){
     mkdir -p /usr/share/phpmyadmin
     fi
     if [ ! -f "/usr/share/phpmyadmin/index.php" ]; then
-    sudo wget -q https://files.phpmyadmin.net/phpMyAdmin/5.2.1/phpMyAdmin-5.2.1-all-languages.zip -O /usr/share/phpmyadmin/phpmyadmin5.2.1.zip
+    sudo wget -q --read-timeout=5 https://files.phpmyadmin.net/phpMyAdmin/5.2.1/phpMyAdmin-5.2.1-all-languages.zip -O /usr/share/phpmyadmin/phpmyadmin5.2.1.zip
 
     cd /usr/share/phpmyadmin/ && unzip -qq phpmyadmin5.2.1.zip && mv phpMyAdmin-5.2.1-all-languages/* .
     rm -rf /usr/share/phpmyadmin/phpmyadmin5.2.1.zip phpMyAdmin-5.2.1-all-languages
@@ -409,33 +387,19 @@ fi
 
 function reqpackages(){
     echo-green "Please wait while I'm installling essential packages, it may ask for input in initial phase."
-        sudo apt-get install -y $requiredpkg > /dev/null 2>&1
+        sudo apt-get install -y $requiredpkg 
+        #> /dev/null 2>&1
 }
 
 function composer(){
-    echo-green "Installling composer"
-    sudo sh -c "echo 'precedence ::ffff:0:0/96 100' >> /etc/gai.conf"
-    rm -rf /usr/local/bin/composer && rm -rf /usr/bin/composer
-    EXPECTED_SIGNATURE="$(wget -q -O - https://composer.github.io/installer.sig)"
-    php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-    ACTUAL_SIGNATURE="$(php -r "echo hash_file('SHA384', 'composer-setup.php');")"
-
-    if [ "$EXPECTED_SIGNATURE" != "$ACTUAL_SIGNATURE" ]
-    then
-        >&2 echo-red 'ERROR: Invalid installer signature'
-    fi
-
-    php composer-setup.php --quiet
-    #RESULT=$?
-    rm composer-setup.php
-    mv composer.phar /usr/bin/composer
-    #exit $RESULT
-    
+    echo-yellow "remove existing composer & installing new version"
+    rm -rf /usr/bin/composer
+    cp $CONFDIR/vhosttemplates/composer.phar /usr/bin/composer2
 }
 function dnssetup(){
-    echo-red "Setup CustomDNS"
+    echo-red "Setup Custom DNS"
     customdns="n"
-    echo-red "Would you use CustomDNS  y/N" 
+    echo-red "Would you use Custom DNS  y/N" 
     read customdns 
     if [ "$customdns" = "y" ];then   
 	    systemctl disable systemd-resolved.service
@@ -444,7 +408,7 @@ function dnssetup(){
 	    touch  /etc/resolv.conf
 	    echo-yellow "DNS1"
 	    read DNS1
-	    echo "nameserver 192.168.0.7" > /etc/resolv.conf
+	    echo "nameserver 8.8.8.8" > /etc/resolv.conf
 	    echo-yellow "DNS2"
 	    read DNS2
 	    echo "nameserver 1.1.1.1" >> /etc/resolv.conf
@@ -493,19 +457,28 @@ function otherservices(){
 
 }
 function installpackages(){
-    sudo apt update -y  > /dev/null 2>&1
+    clear
     #echo-yellow "Please wait while installing selected packages"
-    apt install -y $mariadb $apache2 $php70fpm $php71fpm $php72fpm $php73fpm $php74fpm $php80fpm $php81fpm $php82fpm $php83fpm > /dev/null 2>&1
+    declare -a arr=(  )
+    for packages in "${arr[@]}"
+   do
+     clear
+     echo-green "installing $packages"
+     apt install -y ${packages} > /dev/null 2>&1
+   done
+
 }
 function chrome-browser(){
-  if [ $chrome == "on" ];then 
+  if [ $chrome = "on" ];then 
   wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  echo-green "Installing Google Chrome"
   apt install -y -f ./google-chrome-stable_current_amd64.deb > /dev/null 2>&1
   rm google-chrome-stable_current_amd64.deb
   fi
 }
 function vscode(){
-  if [ $vscode == "on" ];then  
+  if [ $vscode = "on" ];then  
+  echo-green "Installing VSCODE"
   snap install code --classic > /dev/null 2>&1
   fi
 }
@@ -522,6 +495,8 @@ function installCAbrowsers(){
 	mkdir -p /usr/local/share/ca-certificates
   fi
   if [ ! -f "/usr/local/share/ca-certificates/local-ca.crt" ];then
+     ls -lah
+
     cp $CONFDIR/openssl/ca-bundle.pem /usr/local/share/ca-certificates/local-ca.crt && update-ca-certificates
   fi
 
@@ -533,16 +508,22 @@ echo "==========================================================================
 }
 
 function success(){
- echo-green "=================================  Installation sucessfully completed  ==============================="  
+    touch ${STATUS}
+    V_STATUS=$(head -n 1 ${STATUS})
+    if [ ! -f  "$STATUS" ] || [ ! "$V_STATUS" = "$VERSION" ]; then
+        echo -e "${VERSION}\n" > $STATUS
+        echo-green "=================================  Installation sucessfully completed  ==============================="
+    fi
 }
 
 #execute functions
-echo "Please wait while system updating apt updates"
-sudo apt update -qq
 #echo-green "Executing Func. systemmanager-verify-sudo" 
 systemmanager-verify-sudo
-#echo-green "Executing Func. systemmanager-install"
-systemmanager-install
+echo-green "Please wait while system updating apt updates"
+sudo apt update
+#-qq
+
+l
 #echo-green "Executing Func. reqpackages"
 reqpackages
 #echo-green "Executing Func. installpkgselect"

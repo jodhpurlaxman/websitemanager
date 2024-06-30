@@ -1,28 +1,4 @@
 #!/bin/bash
-
-# ---------------------------------------------------------------------------- #
-# GLOBAL VARIABLES (in script)                                                 #
-# ---------------------------------------------------------------------------- #
-
-CONFDIR="/opt/websitemanager"
-DOMAIN=''
-# red output
-RED='\033[0;31m'
-# green output
-GREEN='\033[0;32m'
-# Yellow outpu
-YELLOW='\033[0;33m'
-# No Color
-NC='\033[0m'
-POOL_TEMPLATE="/opt/websitemanager/phpini-templates/php-fpm.conf"
-HAS_POOL_TEMPLATE="1"
-USERNAME=""
-mysqlcred="/opt/websitemanager/mysql"
-domainslist="/opt/websitemanager/domainlist"
-# ---------------------------------------------------------------------------- #
-# FUNCTIONS                                                                    #
-# ---------------------------------------------------------------------------- #
-
 #
 # Echoes a red message
 #
@@ -46,15 +22,15 @@ echo-yellow() {
 
 
 #
-# Shows info on the authors and the program
+# Shows info about the authors and the program
 #
 websitemanager-credits() {
 
-    echo -e "${GREEN}"
+    echo -e "${yellow}"
     cat <<splash
 ##############################################################################
 ##############################################################################
-# websitemanager v1.3.0 Created by LKY Rajpurohit <jodhpur.laxman@gmail.com> #
+# websitemanager v1.4.0 Created by LKY Rajpurohit <jodhpur.laxman@gmail.com> #
 ##############################################################################
 ##############################################################################
 
@@ -62,104 +38,105 @@ splash
     echo -e "${NC}"
 
 }
+# ---------------------------------------------------------------------------- #
+# GLOBAL VARIABLES (in script)
+                                                 #
+#CONFDIR="$CONFDIR"
+CONFDIR="/opt/websitemanager"
+DOMAIN=''
+# red output
+RED='\033[0;31m'
+# green output
+GREEN='\033[0;32m'
+# Yellow outpu
+YELLOW='\033[0;33m'
+# No Color
+NC='\033[0m'
 
-#
-# Verifies sudo 
-#
-websitemanager-verify-sudo() {
+POOL_TEMPLATE="$CONFDIR/phpini-templates/php-fpm.conf"
+HAS_POOL_TEMPLATE="1"
+USERNAME=""
+STATUS="$CONFDIR/status" 
+VERSION="1.4.0"
+mysqlcred="$CONFDIR/mysql"
+domainslist="$CONFDIR/domainlist"
 
-    if [ "$EUID" -ne 0 ]
-      then echo-red "Please execute as root eg: sudo"
-      echo-red "else contact server administrator"	    
-      exit 1
-    fi
-
-}
-
-#
-# Shows usage information to user
-#
-websitemanager-usage() {
-
-    echo -e "${YELLOW}"
-    cat <<"USAGE"
-
-Uso: websitemanager [options] <name of vhost>
-    -h		|--help   help
-    -d          domain of the project eg: site.dev
-    -l          list all vhosts
-    -t          set vhost template like default. laravel, nodejs
-    -pv         set php version vhost
-    -dr		custom document root for pointing the domain to existing folder
-    -p          sets the application's port for nodejs/proxy
-    -u          set domain for the system user like you(anil, vijay, nitin)  
-    -install    install the script globally
-    -update     Autoupdate script if is needed
+websitemanager-credits
+if [ "$EUID" -ne 0 ];then
+     echo-red "Please execute as root or sudo "
+     echo-red "else contact server administrator"	    
+     exit 1
+ fi
 
 
-USAGE
-
-    echo "Examples:"
-    echo
-    echo-yellow "Example: for creating a vhost domain \"sitename.dev\" with the template \"wordpress\" and php version 7.2 use below command"
-    echo-green "sudo websitemanager -d sitename.dev -t default -f wordpress -pv 7.2  -u {yoursystemusername} #without -pv it will set php8.0 as default php version, if framework -f not defined it will not install it"
-    echo-red "Explanation of flags"
-    echo-green "-d domainname  // mandatory option"
-    echo-green "-pv php version i.e 7.1, 7.2, 8.3"
-    echo-green "-dr custom document root of domain i.e /full_path_of_existing_folder, default is /home/{yoursystemusername}/public_html/sites/$domain"
-    echo-green "-p port only applicable if -t is node "
-    echo-green "-t apache vhost template i.e default, laravel, node "
-    echo-green "-f install framework while creating vhost i.e laravel, wordpress"
-	
-
-    echo -e "${NC}"
-    exit 0
+# ---------------------------------------------------------------------------- #
+PV_OPT() {
+echo-yellow "Please select the PHP version:"
+select PHP_VERSION in "7.0" "7.1" "7.2" "7.3" "7.4" "8.0" "8.1" "8.2" "8.3" 
+do
+    case $PHP_VERSION in
+        "7.0")
+            echo "You selected the PHP 7.0"
+            break
+            ;;
+        "7.1")
+            echo "You selected the PHP 7.1."
+            break
+            ;;
+       "7.2")
+            echo "You selected the PHP 7.2."
+            break
+            ;;
+        "7.3")
+            echo "You selected the PHP 7.3."
+            break
+            ;;
+        "7.4")
+            echo "You selected the PHP 7.4."
+            break
+            ;;
+        "8.0")
+            echo "You selected the PHP 8.0."
+            break
+            ;;
+        "8.1")
+            echo "You selected the PHP 8.1."
+            break
+            ;;
+        "8.2")
+            echo "You selected the PHP 8.2."
+            break
+            ;;
+        "8.3")
+            echo "You selected the PHP 8.3."
+            break
+            ;;                                    
+        *)
+            echo "Invalid option. Please try again."
+            ;;
+    esac
+done
 
 }
 
 #
 # install script, instal option to add the script in bin directory
 #
-websitemanager-install() {
-    #websitemanager-verify-sudo;
-
-    if [ ! -e  "$CONFDIR" ]; then
-        mkdir "$CONFDIR"
-    fi
-
-    #cp template.conf template-phpfpm.conf template-pool.conf $CONFDIR
-    cp -r $(pwd)/. $CONFDIR
-    ln -s -f $CONFDIR/websitemanager /usr/bin/websitemanager
-    ln -s -f $CONFDIR/systemmanager /usr/bin/systemmanager
-
-    echo-green "Script installed! use: sudo systemanager #for packages installation"
-    echo-green "Script installed! use: sudo websitemanager # for websites vhosts creation"
-
-    exit 0
-
+function mysqlcred(){
+	if [ ! -f ${mysqlcred} ]; then
+		echo-green "Setup Mysql account"
+		echo-yellow "Please enter mysql USERNAME other then root"
+	    	read mysqluser
+		echo-yellow "Please enter mysql password"
+		read mysqluserpasswd
+                touch ${mysqlcred} 
+                #save mysql credentials in file for further uses
+		echo -e "${mysqluser}\n${mysqluserpasswd}" > ${mysqlcred}
+	else
+	    mysqluser=$(head -n 1 ${mysqlcred})
+	    mysqluserpasswd=$(tail -n 1 ${mysqlcred})
+fi
 }
-
-#
-# Update Vhost
-#
-websitemanager-update() {
-    #websitemanager-verify-sudo;
-    cd /opt/websitemanager
-    git checkout .
-    git remote update > /dev/null
-    needUpdate=$(git status -uno | grep -c "git pull")
-
-    if [ "$needUpdate" -ne 0 ]; then
-        echo-yellow "Need update..."
-        git reset --hard origin/master > /dev/null
-        echo-green "Update complete!"
-        echo-red "Please re-run same command"
-        exit 0
-    fi
-}
-
-
-
 #
 # List avaliable and enabled vhosts
 #
@@ -175,22 +152,61 @@ websitemanager-list() {
 
 }
 
+websitemanager-install() {
+    if [ ! -d  "$CONFDIR" ] || [ ! -f  "$CONFDIR/websitemanger" ]; then
+        [ -d "$CONFDIR" ] || mkdir "$CONFDIR"
+        cp -r $(pwd)/. $CONFDIR
+        ln -s -f $CONFDIR/websitemanager /usr/bin/websitemanager
+        ln -s -f $CONFDIR/systemmanager /usr/bin/systemmanager
+
+        echo-green "Script installed! use: sudo systemanager #for packages installation"
+        echo-green "Script installed! use: sudo websitemanager # for websites vhosts creation"
+    fi
+    grep -q "ALL ALL = NOPASSWD: /usr/bin/cat, /usr/bin/update-alternatives, /usr/bin/websitemanager, /usr/bin/systemmanager, /bin/systemctl restart apache2, /bin/kill" /etc/sudoers
+    if [[ $? != 0 ]] ; then
+        echo "ALL ALL = NOPASSWD: /usr/bin/cat, /usr/bin/update-alternatives, /usr/bin/websitemanager, /usr/bin/systemmanager, /bin/systemctl restart apache2, /bin/kill" >> /etc/sudoers
+    fi
+    
+    #cd $CONFDIR
+    #git checkout .
+    #git remote update > /dev/null
+    #needUpdate=$(git status -uno | grep -c "git pull")
+
+    # if [ "$needUpdate" -ne 0 ]; then
+    #     echo-yellow "there are some updates, would you like to update y/n"
+    #     read updates
+    #     if [ "$updates" = "y" ];then
+    #        git reset --hard origin/master > /dev/null
+    #        echo-green "Update complete!"
+            if [ ! -f  "$STATUS" ];then
+                touch ${STATUS}
+            fi    
+            V_STATUS=$(head -n 1 ${STATUS})
+            if [ ! -f  "$STATUS" ] || [ ! "$V_STATUS" = "$VERSION" ]; then
+                echo-red "Upgrade required Please run sudo systemmanager"
+                exit 1
+            fi    
+    #     fi
+       
+    # fi
+
+}
 
 
 #
 # Validate template's existance
 #
 websitemanager-template() {
-    #websitemanager-verify-sudo;
-    echo-green "Verifying template..."
-        if [ ! -f "/opt/websitemanager/vhosttemplates/$TEMPLATE" ]; then
-            echo-red "$TEMPLATE not found!"
+
+    echo-yellow "Verifying template..."
+        if [ ! -f "$CONFDIR/vhosttemplates/$TEMPLATE.conf" ]; then
+            echo-red "Template file $TEMPLATE not found!"
             exit 1
         fi
     	if [ $HAS_POOL_TEMPLATE = "1" ]; then
-        echo-green "Verifying pool template..."
+        echo-green "Verifying PHP pool template..."
 
-        if [ ! -f "/opt/websitemanager/phpini-templates/php-fpm.conf" ]; then
+        if [ ! -f "$CONFDIR/phpini-templates/php-fpm.conf" ]; then
                 echo-red "$POOL_TEMPLATE not found!"
                 exit 1
            
@@ -199,54 +215,42 @@ websitemanager-template() {
 
 }
 
-websitemanager-getusername() {
-#websitemanager-verify-sudo;
+websitemanager-getuname() {
 if [ "$USERNAME" == "" ]; then
-    username=$(logname)
-else
-    username="$USERNAME"
+    USERNAME=$(logname)
 fi
 }
 
-#sudoers_user() {
-#websitemanager-verify-sudo;
-#if ! grep -q "$(logname)" /etc/sudoers; then
-#    echo "$(username) ALL = NOPASSWD: /bin/systemctl restart apache2.service, /usr/bin/websitemanager, /usr/bin/systemmanager, /bin/kill" >> /etc/sudoers
-#fi
-#}
-
-#
 # Creates a new vhost in sites available of apache
 #
 websitemanager-generate-vhost() {
-    #websitemanager-verify-sudo;
     echo-green "Creating $DOMAIN virtual host."
     	
     APACHE_CONF="/etc/apache2/sites-available/$DOMAIN.conf"
-    cp  $CONFDIR/vhosttemplates/$TEMPLATE $APACHE_CONF
+    cp  $CONFDIR/vhosttemplates/$TEMPLATE.conf $APACHE_CONF
     
-    sed -i 's#user#'$username'#g' $APACHE_CONF
-    sed -i 's#domain#'$DOMAIN'#g' $APACHE_CONF
+    sed -i 's#{USERNAME}#'$USERNAME'#g' $APACHE_CONF
+    sed -i 's#{DOMAIN}#'$DOMAIN'#g' $APACHE_CONF
 
    if [ -z "$DOCUMENT_ROOT" ]; then
-	    mkdir -p /home/$username/public_html/sites/$DOMAIN/
-	    mkdir -p /home/$username/public_html/logs/$DOMAIN
-            touch /home/$username/public_html/logs/$DOMAIN/{access.log,error.log}
-	    chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
-	    chown -R $username:$username /home/$username/public_html/sites/$DOMAIN
+	    mkdir -p /home/$USERNAME/public_html/sites/$DOMAIN/
+	    mkdir -p /home/$USERNAME/public_html/logs/$DOMAIN
+            touch /home/$USERNAME/public_html/logs/$DOMAIN/{access.log,error.log}
+	    chown -R $USERNAME:$USERNAME /home/$USERNAME/public_html/logs/$DOMAIN
+	    chown -R $USERNAME:$USERNAME /home/$USERNAME/public_html/sites/$DOMAIN
     else
-	        sed -i "s+/home/$username/public_html/sites/$DOMAIN+$DOCUMENT_ROOT+g" $APACHE_CONF
+	        sed -i "s+/home/$USERNAME/public_html/sites/$DOMAIN+$DOCUMENT_ROOT+g" $APACHE_CONF
 	    	mkdir -p $DOCUMENT_ROOT
-		chown -R $username:$username $DOCUMENT_ROOT
-		mkdir -p /home/$username/public_html/logs/$DOMAIN
-		touch /home/$username/public_html/logs/$DOMAIN/{access.log,error.log}
-		chown -R $username:$username /home/$username/public_html/logs/$DOMAIN
+		chown -R $USERNAME:$USERNAME $DOCUMENT_ROOT
+		mkdir -p /home/$USERNAME/public_html/logs/$DOMAIN
+		touch /home/$USERNAME/public_html/logs/$DOMAIN/{access.log,error.log}
+		chown -R $USERNAME:$USERNAME /home/$USERNAME/public_html/logs/$DOMAIN
     fi
     	 
-    if [ "$TEMPLATE" == "node.conf" ]; then
-    sed -i 's#localhost:port#'localhost:$PORT'#g' $APACHE_CONF
+    if [ "$TEMPLATE" == "proxy" ]; then
+    sed -i 's#{LOCALHOST:PORT}#'localhost:$PORT'#g' $APACHE_CONF
     else
-    	sed -i 's#php_version#'$PHP_VERSION'#g' $APACHE_CONF
+    	sed -i 's#{PHP_VERSION}#'php$PHP_VERSION'#g' $APACHE_CONF
     fi
 
     if [ $HAS_POOL_TEMPLATE == "1" ];then
@@ -261,21 +265,19 @@ websitemanager-generate-vhost() {
 }
 
 websitemanager-generate-php-pool() {
-    #websitemanager-verify-sudo;
-    echo-green "Creating PHP-FPM config for virtual host."
+    echo-green "Creating PHP-FPM config for virtual host $DOMAIN."
     cp $POOL_TEMPLATE /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
     if [ -z "$DOCUMENT_ROOT" ]; then
-    sed -i 's#domain#'$DOMAIN'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
+    sed -i 's#{DOMAIN}#'$DOMAIN'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
     else
     sed -i "s+/home/userfpm/public_html/sites/domain+$DOCUMENT_ROOT+g" /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
-    sed -i 's#domain#'$DOMAIN'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
+    sed -i 's#{DOMAIN}#'$DOMAIN'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
     fi
-    sed -i 's#php_version#'$PHP_VERSION'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
-    sed -i 's#userfpm#'$username'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
+    sed -i 's#{PHP_VERSION}#'php$PHP_VERSION'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
+    sed -i 's#{FPMUSERNAME}#'$USERNAME'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
 }
 
 websitemanager-remove() {
-    #websitemanager-verify-sudo;
     FPM_POOL_CONF="/etc/$PHP_VERSION/fpm/pool.d/$CONFNAME"
 
     echo-yellow "removing domain from /etc/hosts."
@@ -300,16 +302,16 @@ websitemanager-remove() {
 #  Adds the new vhost domain in hosts file
 #
 websitemanager-point-ip() {
-    #websitemanager-verify-sudo;
     HOSTS_PATH="/etc/hosts"
 
-    echo-green "pointing $DOMAIN  via /etc/hosts ..."
+    echo-green "pointing $DOMAIN www.$DOMAIN   via /etc/hosts ..."
 
-    if grep -F "$DOMAIN" $HOSTS_PATH
+    if grep -w "$DOMAIN" $HOSTS_PATH
     then
         echo-yellow "Domain already exists"
     else
         sed -i '1s/^/127.0.0.1       '$DOMAIN'\n/' $HOSTS_PATH
+        sed -i '1s/^/127.0.0.1       'www\.$DOMAIN'\n/' $HOSTS_PATH
     fi
 
 }
@@ -322,7 +324,6 @@ cd "$CONFDIR/openssl"
 # Reloads apache server and php-fpm, if required
 #
 websitemanager-enable-reload() {
-    #websitemanager-verify-sudo;
     a2ensite $DOMAIN
 
     service apache2 reload
@@ -330,7 +331,7 @@ websitemanager-enable-reload() {
     #echo-green "Virtual host $DOMAIN created you can access via https://$DOMAIN"
 
     if [ $HAS_POOL_TEMPLATE = "1" ]; then
-        service php$PHP_VERSION-fpm restart
+        service $PHP_VERSION-fpm restart
         #echo-green "Pool for site with host and pool $CONFNAME enabled"
     fi
 
@@ -338,7 +339,6 @@ websitemanager-enable-reload() {
 }
 
 install_framework(){
-echo "document root is $DOCUMENT_ROOT"
 if [ -z "$DOCUMENT_ROOT" ]; then
  if [ -z "$(ls -A $DOCUMENT_ROOT)" ]; then
     echo ""
@@ -348,20 +348,21 @@ if [ -z "$DOCUMENT_ROOT" ]; then
  fi
  fi
 if [ "$FRAMEWORK" == "laravel" ]; then
+    mysqlcred
     echo-green "================================="
     echo-green "downloading and installing latest Laravel version"
         export COMPOSER_ALLOW_SUPERUSER=1
  	composer create-project laravel/laravel "$DOCUMENT_ROOT"
-	chown -R $username:$username $DOCUMENT_ROOT
+	chown -R $USERNAME:$USERNAME $DOCUMENT_ROOT
     temp_DB=${DOMAIN%.*}
     temp_DB=$(sed "s/-/_/g" <<< "$temp_DB")
-    DB=${username}_${temp_DB}
-    echo "creating Database for site ${DB}"  
+    DB=${USERNAME}_${temp_DB}
+    echo-green "creating Database for site ${DB}"  
     sudo mysql -e "CREATE DATABASE $DB;"
-    sed -i 's/laravel/${DB}/' $DOCUMENT_ROOT/.env
-    sed -i 's/root/${mysqluser}/' $DOCUMENT_ROOT/.env
-    sed -i 's/DB_PASSWORD=/DB_PASSWORD=${mysqluserpasswd}/' $DOCUMENT_ROOT/.env
-mysqlcred
+    sed -i "s/laravel/${DB}/" $DOCUMENT_ROOT/.env
+    sed -i "s/root/${mysqluser}/" $DOCUMENT_ROOT/.env
+    sed -i "s/DB_PASSWORD=/DB_PASSWORD=${mysqluserpasswd}/" $DOCUMENT_ROOT/.env
+
 
 elif [ "$FRAMEWORK" == "wordpress" ]; then
 	cd /tmp
@@ -372,33 +373,19 @@ elif [ "$FRAMEWORK" == "wordpress" ]; then
     temp_DB=${DOMAIN%.*}
     
     temp_DB=$(sed "s/-/_/g" <<< "$temp_DB")
-    DB=${username}_${temp_DB} 
+    DB=${USERNAME}_${temp_DB} 
     echo "creating Database for site $DB"  
     sudo mysql -e "CREATE DATABASE $DB;"
     cp $DOCUMENT_ROOT/wp-config-sample.php $DOCUMENT_ROOT/wp-config.php
-    sed -i 's/database_name_here/${DB}/' $DOCUMENT_ROOT/wp-config.php
-    sed -i 's/username_here/${mysqluser}/' $DOCUMENT_ROOT/wp-config.php
-    sed -i 's/password_here/${mysqluserpasswd}/' $DOCUMENT_ROOT/wp-config.php
-    chown -R $username:$username "$DOCUMENT_ROOT"
+    sed -i "s/database_name_here/${DB}/" $DOCUMENT_ROOT/wp-config.php
+    sed -i "s/username_here/${mysqluser}/" $DOCUMENT_ROOT/wp-config.php
+    sed -i "s/password_here/${mysqluserpasswd}/" $DOCUMENT_ROOT/wp-config.php
+    chown -R $USERNAME:$USERNAME "$DOCUMENT_ROOT"
 
-mysqlcred
+
 fi
 }
-function mysqlcred(){
-	if [ ! -f ${mysqlcred} ]; then
-		echo-green "Setup Mysql account"
-		echo-yellow "Please enter mysql username other then root"
-	    	read mysqluser
-		echo-yellow "Please enter mysql password"
-		read mysqluserpasswd
-                touch ${mysqlcred} 
-                #save mysql credentials in file for further uses
-		echo -e "${mysqluser}\n${mysqluserpasswd}" > ${mysqlcred}
-	else
-	    mysqluser=$(head -n 1 ${mysqlcred})
-	    mysqluserpasswd=$(tail -n 1 ${mysqlcred})
-fi
-}
+
 function savedomainslist(){
 	if [ ! -f ${domainslist} ]; then
                 touch ${domainslist} 
@@ -415,40 +402,127 @@ if [ ! "$TEMPLATE" == "node.conf" ];then
 	echo-green "Setup default php cli version to php$PHP_VERSION"
 	update-alternatives --set php /usr/bin/php$PHP_VERSION > /dev/null 2>&1
 	echo-yellow "you can use following commond to set default php CLI version via terminal"
-	echo-red "sudo update-alternatives --set php /usr/bin/php8.2"
+	echo-green "sudo update-alternatives --set php /usr/bin/phpversion"
 fi
 }
 
+websitemanager-install
+
+#=========================================================================================
+echo-yellow "Select an option"
+    select ACTION in "add" "list" "delete"
+    do
+        case $ACTION in
+            "add")
+                echo -e "You have selected add.\n"
+                break
+                ;;
+            "list")
+                echo -e "You selected list.\n"
+                break
+                ;;
+            "delete")
+                echo -e "You selected delete.\n"
+                break
+                ;;    
+            *)
+                echo -e "Invalid option. Please try again.\n"
+                ;;
+        esac
+    done
+
+if [ ! $ACTION == "list" ]; then
+    echo-yellow "Please enter the domain name:"
+    read DOMAIN
+
+    if [[ $DOMAIN =~ ^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$ ]]; then
+        echo ""
+    else
+        echo "Invalid domain name: $DOMAIN"
+        exit 1
+    fi
+fi
+
+echo-yellow "Please select the Apache Vhost template:"
+select TEMPLATE in "default" "wordpress" "laravel" "proxy"
+do
+    case $TEMPLATE in
+        "default")
+            echo -e "You selected the default template.\n"
+            break
+            ;;
+        "wordpress")
+            echo -e "You selected the wordpress template.\n"
+            break
+            ;;    
+        "laravel")
+            echo -e "You selected the Laravel template.\n"
+            break
+            ;;
+        "proxy")
+            echo -e "You selected the proxy template(used for Node.js, NextJs, VueJs, etc).\n"
+            break
+            ;;
+        *)
+            echo -e "Invalid option. Please try again.\n"
+            ;;
+    esac
+done
+if [ ! $TEMPLATE == "proxy" ] && [ ! $TEMPLATE == "default" ]; then
+    echo-yellow "Would you like to auto install framework?"
+    select FRAMEWORK_OPT in "Yes" "No"
+    do
+        case $FRAMEWORK_OPT in
+            "Yes")
+                echo -e "You have selected Yes.\n"
+                break
+                ;;
+            "No")
+                echo -e "You selected NO.\n"
+                break
+                ;;
+            *)
+                echo -e "Invalid option. Please try again.\n"
+                ;;
+        esac
+    done
+fi
+
+if [ "$FRAMEWORK_OPT" = "Yes" ] && [ "$TEMPLATE" = "wordpress" ]; then 
+    FRAMEWORK="wordpress"   
+elif [ "$FRAMEWORK_OPT" = "Yes" ] && [ "$TEMPLATE" = "laravel" ]; then
+    FRAMEWORK="laravel"
+fi
+
+
+if [ ! $TEMPLATE == "proxy" ]; then
+    PV_OPT
+else
+    PORT=3000
+
+fi
 
 verifyuserinput(){
-echo-green "=============================================================================="
+clear    
+echo-red "=============================================================================="
 echo-green
-echo-green "Username: $username";
 echo-green "Domain: $DOMAIN"
-echo-green "VhostTemplate: $TEMPLATE"
+echo-green "Vhost Template: $TEMPLATE"
+if [ ! "$TEMPLATE" == "proxy"  ]; then
+echo-green "PHP Version: $PHP_VERSION"
+HAS_POOL_TEMPLATE="1"
+DOCUMENT_ROOT=/home/$USERNAME/public_html/sites/$DOMAIN/
+else
+echo-green "PORT: $PORT"
+fi
 if [ -z "$FRAMEWORK"  ]; then
-echo-yellow "Framework: Not Defined"
+echo-yellow "Framework: Not Selected"
 else
 echo-green "Framework: $FRAMEWORK"
 fi
-if [ -z "$DOCUMENT_ROOT" ]; then
-#DOCUMENT_ROOT="/home/$username/public_html/sites/$DOMAIN"
-echo-green "Document root:/home/$username/public_html/sites/$DOMAIN"
-else
-    echo-yellow "Custom Document root: $DOCUMENT_ROOT"
-fi    
-if [ "$TEMPLATE" == 'node.conf' ]; then
-    echo-green "Port: $PORT"
-else
-    echo-green "Php_Version: $PHP_VERSION"
-fi
-
-
+echo-green "USERNAME: $USERNAME";
 echo-green
-echo-green "=============================================================================="
-echo-green
-echo-red "" 
-#read answer
+echo-red "=============================================================================="
 read -p "Would you like to create domain/site with above configuration (y/n)?" answer
 case ${answer:0:1} in
     y|Y )
@@ -461,74 +535,12 @@ esac
 }
 
 #
-# Initial script
-#
-while [ $1 ]; do
-    case "$1" in
-        '-l') websitemanager-list;;
-        '-h'|'--help') websitemanager-usage;;
-        '-t') TEMPLATE="$2.conf";;
-	'-f') FRAMEWORK="$2";;
-        '-pv')
-            PHP_VERSION="$2";;
-	'-dr') DOCUMENT_ROOT="$2";;    
-        '-p') PORT="$2";;    
-        '-d') DOMAIN="$2";;
-        '-u') USERNAME="$2";;
-        '-install') websitemanager-install;;
-        '-update') websitemanager-update;;
-    esac
-    shift
-done
-
-#
-# Verify the parameters usage
-#
-if [ "$DOMAIN" == "" ]; then
-    echo-red "You need to specify the options -d "
-    websitemanager-usage;
-    exit 0;
-fi
-
-if [ "$PHP_VERSION" == "" ]; then
-    PHP_VERSION="8.0"
-fi
-if [ "$DOCUMENT_ROOT" == "" ]; then
-    DOCUMENT_ROOT="/home/$USERNAME/public_html/sites/$DOMAIN"
-else
-     DOCUMENT_ROOT=$DOCUMENT_ROOT
-    
-
-fi
-
-if [ "$FRAMEWORK" == "laravel" ]; then
-    TEMPLATE="laravel"
-    HAS_POOL_TEMPLATE="1"
-elif [ "$FRAMEWORK" == "wordpress" ]; then
-    TEMPLATE="wordpress"
-    HAS_POOL_TEMPLATE="1"
-fi
-
-
-if [ "$TEMPLATE" == "wordpress" ]; then
-    TEMPLATE="default.conf"
-    HAS_POOL_TEMPLATE="1"
-elif [ "$TEMPLATE" == "node.conf" ]; then
-    HAS_POOL_TEMPLATE="0"
-elif [ "$TEMPLATE" == "laravel.conf" ]; then
-    HAS_POOL_TEMPLATE="1"
-fi
-
-if [ "$PORT" == "" ]; then
-    PORT="3000"
-fi
-#
 # Do vhost creation process
 #
-echo-green "$HAS_POOL_TEMPLATE"
-websitemanager-update;
+#echo-green "$HAS_POOL_TEMPLATE"
+#websitemanager-update;
 #sudoers_user;
-websitemanager-getusername;
+websitemanager-getuname;
 verifyuserinput;
 websitemanager-template;
 websitemanager-generate-vhost;
