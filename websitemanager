@@ -148,12 +148,12 @@ websitemanager-list() {
     echo-green "Virtual hosts enabled:"
     ls -1 "/etc/apache2/sites-enabled/"
 
-    exit 0
+    exit 1
 
 }
 
 websitemanager-install() {
-    if [ ! -d  "$CONFDIR" ] || [ ! -f  "$CONFDIR/websitemanger" ]; then
+    if [ ! -d  "$CONFDIR" ] || [ ! -f  "$CONFDIR/websitemanager" ]; then
         [ -d "$CONFDIR" ] || mkdir "$CONFDIR"
         cp -r $(pwd)/. $CONFDIR
         ln -s -f $CONFDIR/websitemanager /usr/bin/websitemanager
@@ -250,7 +250,7 @@ websitemanager-generate-vhost() {
     if [ "$TEMPLATE" == "proxy" ]; then
     sed -i 's#{LOCALHOST:PORT}#'localhost:$PORT'#g' $APACHE_CONF
     else
-    	sed -i 's#{PHP_VERSION}#'php$PHP_VERSION'#g' $APACHE_CONF
+    	sed -i 's#{PHP_VERSION}#'$PHP_VERSION'#g' $APACHE_CONF
     fi
 
     if [ $HAS_POOL_TEMPLATE == "1" ];then
@@ -266,27 +266,28 @@ websitemanager-generate-vhost() {
 
 websitemanager-generate-php-pool() {
     echo-green "Creating PHP-FPM config for virtual host $DOMAIN."
-    cp $POOL_TEMPLATE /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
-    if [ -z "$DOCUMENT_ROOT" ]; then
+    if [ -f /etc/php/$PHP_VERSION/fpm/pool.d/www.conf ]; then
+       rm /etc/php/$PHP_VERSION/fpm/pool.d/www.conf 
+       cp $POOL_TEMPLATE /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf   
+    else 
+         cp $POOL_TEMPLATE /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
+    fi        
+
     sed -i 's#{DOMAIN}#'$DOMAIN'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
-    else
-    sed -i "s+/home/userfpm/public_html/sites/domain+$DOCUMENT_ROOT+g" /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
-    sed -i 's#{DOMAIN}#'$DOMAIN'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
-    fi
-    sed -i 's#{PHP_VERSION}#'php$PHP_VERSION'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
+    sed -i 's#{PHP_VERSION}#'$PHP_VERSION'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
     sed -i 's#{FPMUSERNAME}#'$USERNAME'#g' /etc/php/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf
 }
 
 websitemanager-remove() {
-    FPM_POOL_CONF="/etc/$PHP_VERSION/fpm/pool.d/$CONFNAME"
+    FPM_POOL_CONF="/etc/$PHP_VERSION/fpm/pool.d/$DOMAIN.conf"
 
     echo-yellow "removing domain from /etc/hosts."
     sed -i '/'$DOMAIN'/d' /etc/hosts
 
     echo-yellow "disabling  $DOMAIN virtual host."
-    a2dissite $CONFNAME
+    a2dissite $DOMAIN.conf
 
-    rm "/etc/apache2/sites-available/$CONFNAME"
+    rm "/etc/apache2/sites-available/$DOMAIN.conf"
     service apache2 reload
 
     if [ -f "$FPM_POOL_CONF" ]; then
@@ -303,12 +304,13 @@ websitemanager-remove() {
 #
 websitemanager-point-ip() {
     HOSTS_PATH="/etc/hosts"
+    IP="127.0.0.1"
+    line_to_check="$IP       $DOMAIN"
 
     echo-green "pointing $DOMAIN www.$DOMAIN   via /etc/hosts ..."
-
-    if grep -w "$DOMAIN" $HOSTS_PATH
-    then
-        echo-yellow "Domain already exists"
+    
+    if grep -Fxq "$line_to_check" "$HOSTS_PATH"; then
+        echo-red "Domain already exists"
     else
         sed -i '1s/^/127.0.0.1       '$DOMAIN'\n/' $HOSTS_PATH
         sed -i '1s/^/127.0.0.1       'www\.$DOMAIN'\n/' $HOSTS_PATH
@@ -331,7 +333,7 @@ websitemanager-enable-reload() {
     #echo-green "Virtual host $DOMAIN created you can access via https://$DOMAIN"
 
     if [ $HAS_POOL_TEMPLATE = "1" ]; then
-        service $PHP_VERSION-fpm restart
+        service php$PHP_VERSION-fpm restart
         #echo-green "Pool for site with host and pool $CONFNAME enabled"
     fi
 
@@ -512,13 +514,14 @@ if [ ! "$TEMPLATE" == "proxy"  ]; then
 echo-green "PHP Version: $PHP_VERSION"
 HAS_POOL_TEMPLATE="1"
 DOCUMENT_ROOT=/home/$USERNAME/public_html/sites/$DOMAIN/
+echo-green "DOCUMENT_ROOT: $DOCUMENT_ROOT"
 else
 echo-green "PORT: $PORT"
 fi
 if [ -z "$FRAMEWORK"  ]; then
 echo-yellow "Framework: Not Selected"
 else
-echo-green "Framework: $FRAMEWORK"
+echo-green "Install Framework: $FRAMEWORK"
 fi
 echo-green "USERNAME: $USERNAME";
 echo-green
@@ -526,7 +529,7 @@ echo-red "======================================================================
 read -p "Would you like to create domain/site with above configuration (y/n)?" answer
 case ${answer:0:1} in
     y|Y )
-        echo Yes
+        echo ""
     ;;
     * )
        exit 1

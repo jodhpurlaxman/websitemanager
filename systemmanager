@@ -232,6 +232,7 @@ function rmdb(){
     fi    
 }
 function apacherepo(){
+        clear
         echo-green "setup Apache Repo "
         add-apt-repository ppa:ondrej/apache2 -y #> /dev/null 2>&1
         add-apt-repository ppa:ondrej/php -y #> /dev/null 2>&1
@@ -239,8 +240,8 @@ function apacherepo(){
 }
 function apacheconfig(){
     if [[ -z $Apache ]];then
-        grep -q "/home/*/public_html" "/etc/apache2/apache2.conf" 
-        if [[ $? = 0 ]] ; then
+        grep -q "/home/\*/public_html" "/etc/apache2/apache2.conf" 
+        if [[ $? = 1 ]] ; then
 sed -i '/#<Directory/i \
 <Directory /home/*/public_html/> \
 Options Indexes FollowSymLinks \
@@ -394,7 +395,8 @@ function reqpackages(){
 function composer(){
     echo-yellow "remove existing composer & installing new version"
     rm -rf /usr/bin/composer
-    cp $CONFDIR/vhosttemplates/composer.phar /usr/bin/composer2
+    cp $CONFDIR/vhosttemplates/composer.phar /usr/bin/composer
+    chmod +x /usr/bin/composer
 }
 function dnssetup(){
     echo-red "Setup Custom DNS"
@@ -457,15 +459,9 @@ function otherservices(){
 
 }
 function installpackages(){
-    clear
-    #echo-yellow "Please wait while installing selected packages"
-    declare -a arr=(  )
-    for packages in "${arr[@]}"
-   do
-     clear
-     echo-green "installing $packages"
-     apt install -y ${packages} > /dev/null 2>&1
-   done
+
+     echo-green "installing $mariadb $apache2 $php70fpm $php71fpm $php72fpm $php73fpm $php74fpm $php80fpm $php81fpm $php82fpm $php83fpm"
+     apt install -y $mariadb $apache2 $php70fpm $php71fpm $php72fpm $php73fpm $php74fpm $php80fpm $php81fpm $php82fpm $php83fpm > /dev/null 2>&1
 
 }
 function chrome-browser(){
