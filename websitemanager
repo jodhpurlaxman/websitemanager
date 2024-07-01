@@ -57,7 +57,7 @@ POOL_TEMPLATE="$CONFDIR/phpini-templates/php-fpm.conf"
 HAS_POOL_TEMPLATE="1"
 USERNAME=""
 STATUS="$CONFDIR/status" 
-VERSION="1.4.0"
+VERSION="1.4.1"
 mysqlcred="$CONFDIR/mysql"
 domainslist="$CONFDIR/domainlist"
 
