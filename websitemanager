@@ -30,7 +30,7 @@ websitemanager-credits() {
     cat <<splash
 ##############################################################################
 ##############################################################################
-# websitemanager v1.4.0 Created by LKY Rajpurohit <jodhpur.laxman@gmail.com> #
+   # websitemanager Created by LKY Rajpurohit <jodhpur.laxman@gmail.com> #
 ##############################################################################
 ##############################################################################
 
@@ -57,7 +57,7 @@ POOL_TEMPLATE="$CONFDIR/phpini-templates/php-fpm.conf"
 HAS_POOL_TEMPLATE="1"
 USERNAME=""
 STATUS="$CONFDIR/status" 
-VERSION="1.4.1"
+VERSION="1.4.2"
 mysqlcred="$CONFDIR/mysql"
 domainslist="$CONFDIR/domainlist"
 
