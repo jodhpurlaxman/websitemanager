@@ -180,13 +180,16 @@ websitemanager-install() {
     git remote update > /dev/null
     needUpdate=$(git status -uno | grep -c "git pull")
 
-     if [ "$needUpdate" -ne 0 ]; then
+     if [ "$needUpdate" -ne 0 ] && [ ! -f  "$STATUS" ]; then
          echo-yellow "there are some updates, would you like to update y/n"
          read updates
          if [ "$updates" = "y" ];then
             git reset --hard origin/master > /dev/null
             echo-green "Update complete!"
-         fi   
+         fi
+    else
+         git reset --hard origin/master > /dev/null
+            echo-green "Update complete!"
      fi
 checkstatus    
 
