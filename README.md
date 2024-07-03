@@ -1,6 +1,3 @@
-**#Instruction and help document**
-
-``
 sudo apt install git
 
 git clone https://github.com/jodhpurlaxman/websitemanager
