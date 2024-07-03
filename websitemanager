@@ -150,6 +150,16 @@ websitemanager-list() {
 
 }
 
+checkstatus(){
+if [ ! -f  "$STATUS" ];then
+touch ${STATUS}    
+V_STATUS=$(head -n 1 ${STATUS})
+if [ ! -f  "$STATUS" ] || [ ! "$V_STATUS" = "$VERSION" ]; then
+	echo-red "Upgrade required Please run sudo systemmanager"
+	exit 1
+fi
+fi
+}
 websitemanager-install() {
     if [ ! -d  "$CONFDIR" ] || [ ! -f  "$CONFDIR/websitemanager" ]; then
         [ -d "$CONFDIR" ] || mkdir "$CONFDIR"
@@ -176,17 +186,9 @@ websitemanager-install() {
          if [ "$updates" = "y" ];then
             git reset --hard origin/master > /dev/null
             echo-green "Update complete!"
-            if [ ! -f  "$STATUS" ];then
-                touch ${STATUS}
-            fi    
-            V_STATUS=$(head -n 1 ${STATUS})
-            if [ ! -f  "$STATUS" ] || [ ! "$V_STATUS" = "$VERSION" ]; then
-                echo-red "Upgrade required Please run sudo systemmanager"
-                exit 1
-            fi    
-         fi
-       
-    fi
+         fi   
+     fi
+checkstatus    
 
 }
 
