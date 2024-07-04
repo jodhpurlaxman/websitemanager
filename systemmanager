@@ -207,7 +207,7 @@ function mariaupdate(){
 	if [ -d /var/lib/mysql ] ; then
             mariadbupdate='n'
             cmv=$(mariadb -V | awk '{for(i=1;i<=NF;i++) if ($i ~ /^Distrib/) print $(i+1)}' | awk -F'-' '{print $1}')  
-	    echo-yellow "Current MariaDB Version is " 
+	    echo-yellow "Current MariaDB Version is $cmv" 
             echo-red "Would you like to upgrade mariadb y/n" 
 	    read mariadbupdate 
 		if [ "$mariadbupdate" = "y" ];then
