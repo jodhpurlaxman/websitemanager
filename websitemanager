@@ -181,10 +181,7 @@ websitemanager-install() {
     git checkout .
     git remote update > /dev/null
     needUpdate=$(git status -uno | grep -c "git pull")
-
-     if [ "$needUpdate" -ne 0 ]; then
-         checkstatus
-     fi
+    checkstatus
     
 
 }
