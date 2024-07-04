@@ -155,6 +155,7 @@ if [ ! -f  "$STATUS" ];then
 touch ${STATUS}    
 V_STATUS=$(head -n 1 ${STATUS})
 if [ ! -f  "$STATUS" ] || [ ! "$V_STATUS" = "$VERSION" ]; then
+        git reset --hard origin/master > /dev/null
 	echo-red "Upgrade required Please run sudo systemmanager"
 	exit 1
 fi
@@ -188,10 +189,9 @@ websitemanager-install() {
             echo-green "Update complete!"
          fi
     else
-         git reset --hard origin/master > /dev/null
-            echo-green "Update complete!"
+            checkstatus
      fi
-checkstatus    
+    
 
 }
 
@@ -282,25 +282,36 @@ websitemanager-generate-php-pool() {
 }
 
 websitemanager-remove() {
-    FPM_POOL_CONF="/etc/php/*/fpm/pool.d/$DOMAIN.conf"
-
-    echo-yellow "removing domain from /etc/hosts."
+    echo-red "=============================================================================="
+    read -p "Are you sure deleting $DOMAIN configs(directories require manual deletion) (y/n)?" answer
+	case ${answer:0:1} in
+	    y|Y )
+	        echo ""
+	    ;;
+	    * )
+	       exit 1
+	    ;;
+	esac
+    echo-red "Removing domain from /etc/hosts."
     sed -i '/'$DOMAIN'/d' /etc/hosts
     sed -i '/'www\.$DOMAIN'/d' /etc/hosts
 
     echo-yellow "Disabling  $DOMAIN virtual host."
     a2dissite $DOMAIN.conf
 
-    rm "/etc/apache2/sites-available/$DOMAIN.conf"
-    service apache2 reload
-
+   if [ -f /etc/apache2/sites-available/$DOMAIN.conf ] 
+      rm "/etc/apache2/sites-available/$DOMAIN.conf"
+      service apache2 reload
+      phparray=("7.0" "7.1" "7.2" "7.3" "7.4" "8.0" "8.1" "8.2" "8.3"
+      for php in "${phparray[@]}"
+	do
+  		echo-red "Removing php-fpm file associaed with $DOMAIN"
+                FPM_POOL_CONF="/etc/php/${php}/fpm/pool.d/$DOMAIN.conf"
+                rm "$FPM_POOL_CONF"
+	done
     
-    echo-red "Removing php-fpm associaed with $DOMAIN"
-    rm "$FPM_POOL_CONF"
-    
-
+    fi
     exit 0
-
 }
 
 #
