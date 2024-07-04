@@ -295,7 +295,7 @@ websitemanager-remove() {
    if [ -f /etc/apache2/sites-available/$DOMAIN.conf ]; then 
       rm "/etc/apache2/sites-available/$DOMAIN.conf"
       service apache2 reload
-      phparray=("7.0" "7.1" "7.2" "7.3" "7.4" "8.0" "8.1" "8.2" "8.3"
+      phparray=("7.0" "7.1" "7.2" "7.3" "7.4" "8.0" "8.1" "8.2" "8.3")
       for php in "${phparray[@]}"
 	do
   		FPM_POOL_CONF="/etc/php/${php}/fpm/pool.d/$DOMAIN.conf"
