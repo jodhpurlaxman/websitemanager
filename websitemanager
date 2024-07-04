@@ -118,7 +118,6 @@ do
 done
 
 if [ ! -f "/usr/bin/php$PHP_VERSION" ]; then
-    echo "hi"
     cat <<splash
 ######################################################################################################################
 ######################################################################################################################
@@ -128,7 +127,7 @@ if [ ! -f "/usr/bin/php$PHP_VERSION" ]; then
 
 splash
 exit 1
-
+fi
 }
 
 #
@@ -171,6 +170,8 @@ if [ ! "$V_STATUS" = "$VERSION" ]; then
         git reset --hard origin/master > /dev/null
 	echo-red "Upgrade required Please run sudo systemmanager"
 	exit 1
+else
+       git reset --hard origin/master > /dev/null
 
 fi
 }
