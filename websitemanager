@@ -57,7 +57,7 @@ POOL_TEMPLATE="$CONFDIR/phpini-templates/php-fpm.conf"
 HAS_POOL_TEMPLATE="1"
 USERNAME=""
 STATUS="$CONFDIR/status" 
-VERSION="1.4.2"
+VERSION="1.4.3"
 mysqlcred="$CONFDIR/mysql"
 domainslist="$CONFDIR/domainlist"
 
@@ -154,7 +154,7 @@ checkstatus(){
 if [ ! -f  "$STATUS" ];then
 touch ${STATUS}    
 V_STATUS=$(head -n 1 ${STATUS})
-if [ ! -f  "$STATUS" ] || [ ! "$V_STATUS" = "$VERSION" ]; then
+if [ ! "$V_STATUS" = "$VERSION" ]; then
         git reset --hard origin/master > /dev/null
 	echo-red "Upgrade required Please run sudo systemmanager"
 	exit 1
@@ -181,15 +181,8 @@ websitemanager-install() {
     git remote update > /dev/null
     needUpdate=$(git status -uno | grep -c "git pull")
 
-     if [ "$needUpdate" -ne 0 ] && [ ! -f  "$STATUS" ]; then
-         echo-yellow "there are some updates, would you like to update y/n"
-         read updates
-         if [ "$updates" = "y" ];then
-            git reset --hard origin/master > /dev/null
-            echo-green "Update complete!"
-         fi
-    else
-            checkstatus
+     if [ "$needUpdate" -ne 0 ]' then
+         checkstatus
      fi
     
 
