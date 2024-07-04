@@ -152,13 +152,14 @@ websitemanager-list() {
 
 checkstatus(){
 if [ ! -f  "$STATUS" ];then
-touch ${STATUS}    
+touch ${STATUS}
+fi
 V_STATUS=$(head -n 1 ${STATUS})
 if [ ! "$V_STATUS" = "$VERSION" ]; then
         git reset --hard origin/master > /dev/null
 	echo-red "Upgrade required Please run sudo systemmanager"
 	exit 1
-fi
+
 fi
 }
 websitemanager-install() {
