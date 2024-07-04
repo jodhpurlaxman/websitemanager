@@ -470,7 +470,7 @@ function installpackages(){
 
 }
 function chrome-browser(){
-  if [ $chrome = "on" ];then 
+  if [ "$chrome" = "on" ];then 
   wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   echo-green "Installing Google Chrome"
   apt install -y -f ./google-chrome-stable_current_amd64.deb > /dev/null 2>&1
@@ -478,7 +478,7 @@ function chrome-browser(){
   fi
 }
 function vscode(){
-  if [ $vscode = "on" ];then  
+  if [ "$vscode" = "on" ];then  
   echo-green "Installing VSCODE"
   snap install code --classic > /dev/null 2>&1
   fi
