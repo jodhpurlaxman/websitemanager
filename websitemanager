@@ -275,16 +275,7 @@ websitemanager-generate-php-pool() {
 }
 
 websitemanager-remove() {
-    echo-red "=============================================================================="
-    read -p "Are you sure deleting $DOMAIN configs(directories require manual deletion) (y/n)?" answer
-	case ${answer:0:1} in
-	    y|Y )
-	        echo ""
-	    ;;
-	    * )
-	       exit 1
-	    ;;
-	esac
+    
     echo-red "Removing domain from /etc/hosts."
     sed -i '/'$DOMAIN'/d' /etc/hosts
     sed -i '/'www\.$DOMAIN'/d' /etc/hosts
@@ -565,8 +556,7 @@ elif [ $ACTION = "list" ]; then
 else 
     websitemanager-list
     domain-name
-    websitemanager-remove
-    echo-read " DOMAIN $DOMAIN DELETED"    
+    websitemanager-remove   
 fi
 
 
