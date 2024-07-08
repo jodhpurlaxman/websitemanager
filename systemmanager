@@ -205,12 +205,10 @@ mariarepo(){
 function mariaupdate(){
     
 	if [ -d /var/lib/mysql ] ; then
-            mariadbupdate='n'
-            cmv=$(mariadb -V | awk '{for(i=1;i<=NF;i++) if ($i ~ /^Distrib/) print $(i+1)}' | awk -F'-' '{print $1}')  
-	    status_cmv=$(mariadb -V)
-	    status_cmv=$?
-	    echo-yellow "Current MariaDB Version is $cmv"
-            if [ "$status_cmv" = "0" ] && [ ! $cmv = 10.11.8 ]; then
+            mariadbupdate='n'  
+            if [ -f "/usr/bin/mariadb" ]; then
+                
+                echo-red "Current Mariadb Version is $(mariadb -V)" 
             	echo-red "Would you like to upgrade mariadb y/n" 
 	    	read mariadbupdate 
 			if [ "$mariadbupdate" = "y" ];then
