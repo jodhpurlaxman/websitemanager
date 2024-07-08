@@ -206,7 +206,7 @@ function mariaupdate(){
     
 	if [ -d /var/lib/mysql ] ; then
             mariadbupdate='n'
-            ccmv=$(mariadb -V | awk '{for(i=1;i<=NF;i++) if ($i ~ /^Distrib/) print $(i+1)}' | awk -F'-' '{print $1}')  
+            cmv=$(mariadb -V | awk '{for(i=1;i<=NF;i++) if ($i ~ /^Distrib/) print $(i+1)}' | awk -F'-' '{print $1}')  
 	    status_cmv=$(mariadb -V)
 	    
 	    echo-yellow "Current MariaDB Version is $cmv"
