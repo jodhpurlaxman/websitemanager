@@ -208,7 +208,7 @@ function mariaupdate(){
             mariadbupdate='n'  
             if [ -f "/usr/bin/mariadb" ]; then
                 
-                echo-red "Current Mariadb Version is $(mariadb -V)" 
+                echo-green "Current Mariadb Version is $(mariadb -V)" 
             	echo-red "Would you like to upgrade mariadb y/n" 
 	    	read mariadbupdate 
 			if [ "$mariadbupdate" = "y" ];then
