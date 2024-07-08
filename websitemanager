@@ -57,7 +57,7 @@ POOL_TEMPLATE="$CONFDIR/phpini-templates/php-fpm.conf"
 HAS_POOL_TEMPLATE="1"
 USERNAME=""
 STATUS="$CONFDIR/status" 
-VERSION="1.4.3"
+VERSION="1.4.4"
 mysqlcred="$CONFDIR/mysql"
 domainslist="$CONFDIR/domainlist"
 
@@ -340,9 +340,9 @@ cd "$CONFDIR/openssl"
 #
 websitemanager-enable-reload() {
     a2ensite $DOMAIN
-
+    echo-green "Restarting Apache service"
     service apache2 reload
-
+    echo-green "done"
     #echo-green "Virtual host $DOMAIN created you can access via https://$DOMAIN"
 
     if [ $HAS_POOL_TEMPLATE = "1" ]; then
@@ -546,7 +546,6 @@ fi
 
 if [ ! $TEMPLATE = "proxy" ]; then
     PV_OPT
-fi
 else
     PORT=3000
 
@@ -564,8 +563,10 @@ websitemanager-enable-reload;
 setupphpcli;
 install_framework;
 elif [ $ACTION = "list" ]; then
+    echo "Action List"
      websitemanager-list
-else 
+else
+    echo "Action delete" 
     websitemanager-list
     domain-name
     websitemanager-remove   
