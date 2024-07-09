@@ -380,6 +380,7 @@ if [ "$FRAMEWORK" == "laravel" ]; then
 
 
 elif [ "$FRAMEWORK" == "wordpress" ]; then
+    mysqlcred
 	cd /tmp
     echo-green "=================================="
 	echo-green "downloading and installing wordpress"	
